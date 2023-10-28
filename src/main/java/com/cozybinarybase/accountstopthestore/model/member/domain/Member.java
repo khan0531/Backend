@@ -41,10 +41,6 @@ public class Member extends BaseTimeEntity  implements UserDetails {
 
   private Authority role;
 
-  private LocalDateTime registeredAt;
-
-  private LocalDateTime updatedAt;
-
   private LocalDateTime withdrawalAt;
 
   public void authorizeUser() {
@@ -80,8 +76,6 @@ public class Member extends BaseTimeEntity  implements UserDetails {
         .email(this.email)
         .password(this.password)
         .role(this.role)
-        .registeredAt(this.registeredAt)
-        .updatedAt(this.updatedAt)
         .withdrawalAt(this.withdrawalAt)
         .build();
   }
@@ -96,8 +90,6 @@ public class Member extends BaseTimeEntity  implements UserDetails {
         .email(memberEntity.getEmail())
         .password(memberEntity.getPassword())
         .role(memberEntity.getRole())
-        .registeredAt(memberEntity.getRegisteredAt())
-        .updatedAt(memberEntity.getUpdatedAt())
         .withdrawalAt(memberEntity.getWithdrawalAt())
         .build();
   }

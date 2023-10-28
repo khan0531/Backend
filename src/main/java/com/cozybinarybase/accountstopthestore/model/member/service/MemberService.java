@@ -7,16 +7,26 @@ import com.cozybinarybase.accountstopthestore.model.member.persist.entity.Member
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class MemberService  {
+public class MemberService implements UserDetailsService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
+
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    return this.memberRepository.findByEmail(email)
+        .map(Member::fromEntity)
+        .orElseThrow(() -> new UsernameNotFoundException("가입된 이메일이 아닙니다. -> " + email));
+  }
 
   public MemberResponse signUp(MemberSignUpRequest memberSignUpRequest) {
 
