@@ -13,5 +13,5 @@ spring:
     driver-class-name: org.h2.Driver
 
 JWT:
-  SECRET:
+  SECRET: ${JWT_SECRET:secret}
   EXPIRATION_TIME: ${JWT_EXPIRATION_TIME:864000000}
