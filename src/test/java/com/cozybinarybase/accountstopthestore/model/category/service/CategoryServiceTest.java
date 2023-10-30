@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryDeleteResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
@@ -94,5 +95,32 @@ class CategoryServiceTest {
 
     // then
     assertThat(categoryUpdateResponseDto.getCategoryName()).isEqualTo("쇼핑");
+  }
+
+  @Test
+  void 카테고리_삭제_test() throws Exception {
+    // given
+    Long memberId = 1L;
+
+    // stub 1
+    MemberEntity hong = new MemberEntity();
+    hong.setId(1L);
+    hong.setName("홍길동");
+    hong.setEmail("test@test.com");
+    when(memberRepository.findById(any())).thenReturn(Optional.of(hong));
+
+    // stub 2
+    CategoryEntity existingCategory = new CategoryEntity(1L, "여행", hong);
+    when(categoryRepository.findById(any())).thenReturn(Optional.of(existingCategory));
+
+    // when
+    CategoryDeleteResponseDto categoryDeleteResponseDto =
+        categoryService.deleteCategory(1L, memberId);
+
+    String responseBody = objectMapper.writeValueAsString(categoryDeleteResponseDto);
+    System.out.println("테스트: " + responseBody);
+
+    // then
+    assertThat(categoryDeleteResponseDto.getCategoryId()).isEqualTo(1L);
   }
 }
