@@ -1,6 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.member.persist.entity;
 
 
+import com.cozybinarybase.accountstopthestore.BaseTimeEntity;
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.AuthType;
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authority;
 import java.time.LocalDateTime;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberEntity {
+public class MemberEntity extends BaseTimeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,10 +42,6 @@ public class MemberEntity {
 
   @Enumerated(EnumType.STRING)
   private Authority role;
-
-  private LocalDateTime registeredAt;
-
-  private LocalDateTime updatedAt;
 
   private LocalDateTime withdrawalAt;
 }

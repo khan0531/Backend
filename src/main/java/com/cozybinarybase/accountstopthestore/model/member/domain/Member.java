@@ -23,7 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Member extends BaseTimeEntity  implements UserDetails {
+public class Member implements UserDetails {
 
   private Long id;
 
@@ -40,6 +40,10 @@ public class Member extends BaseTimeEntity  implements UserDetails {
   private String password;
 
   private Authority role;
+
+  private LocalDateTime createdAt;
+
+  private LocalDateTime updatedAt;
 
   private LocalDateTime withdrawalAt;
 
