@@ -2,6 +2,8 @@ package com.cozybinarybase.accountstopthestore.model.category.service;
 
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveResponseDto;
+import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
+import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
@@ -29,5 +31,25 @@ public class CategoryService {
         .build());
 
     return CategorySaveResponseDto.fromEntity(categoryEntity);
+  }
+
+  @Transactional
+  public CategoryUpdateResponseDto updateCategory(
+      Long categoryId,
+      CategoryUpdateRequestDto requestDto,
+      Long memberId
+  ) {
+    if (memberRepository.findById(memberId).isEmpty()) {
+      throw new RuntimeException("찾을 수 없는 회원 번호입니다.");
+    }
+
+    CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(
+        () -> new RuntimeException("찾을 수 없는 카테고리 번호입니다.")
+    );
+
+
+    categoryEntity.update(requestDto.getCategoryName());
+
+    return CategoryUpdateResponseDto.fromEntity(categoryEntity);
   }
 }

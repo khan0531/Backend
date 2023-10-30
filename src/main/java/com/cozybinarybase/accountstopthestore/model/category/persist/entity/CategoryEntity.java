@@ -23,15 +23,19 @@ import lombok.NoArgsConstructor;
 @Entity
 public class CategoryEntity {
 
-	@Id
-	@Column(name = "categoryId")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @Column(name = "categoryId")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(name = "categoryName")
-	private String name;
+  @Column(name = "categoryName")
+  private String name;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member")
-	private MemberEntity member;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member")
+  private MemberEntity member;
+
+  public void update(String categoryName) {
+    this.name = categoryName;
+  }
 }
