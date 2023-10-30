@@ -73,7 +73,7 @@ public class CategoryController {
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 
-  @GetMapping("/{categoryId}")
+  @GetMapping
   public ResponseEntity<?> allCategory(
       @AuthenticationPrincipal Member member
   ) {
