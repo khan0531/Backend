@@ -1,5 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.category.persist.entity;
 
+import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,9 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
-import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Getter
-@Entity
+@Entity(name = "category")
 public class CategoryEntity {
 
   @Id
