@@ -1,5 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.category.controller;
 
+import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryDeleteResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -45,6 +47,16 @@ public class CategoryController {
   ) {
     CategoryUpdateResponseDto responseDto =
         categoryService.updateCategory(categoryId, requestDto, member.getId());
+    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{categoryId}")
+  public ResponseEntity<?> deleteCategory(
+      @PathVariable Long categoryId,
+      @AuthenticationPrincipal Member member
+  ) {
+    CategoryDeleteResponseDto responseDto =
+        categoryService.deleteCategory(categoryId, member.getId());
     return new ResponseEntity<>(responseDto, HttpStatus.OK);
   }
 }
