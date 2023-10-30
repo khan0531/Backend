@@ -1,6 +1,5 @@
 package com.cozybinarybase.accountstopthestore.model.member.domain;
 
-import com.cozybinarybase.accountstopthestore.BaseTimeEntity;
 import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignUpRequest;
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.AuthType;
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authority;
@@ -18,6 +17,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 @Data
 @Builder
@@ -47,40 +47,13 @@ public class Member implements UserDetails {
 
   private LocalDateTime withdrawalAt;
 
-  public void authorizeUser() {
-    this.role = Authority.USER;
-  }
-
-  // 비밀번호 암호화 메소드
-  public void passwordEncode(PasswordEncoder passwordEncoder) {
-    this.password = passwordEncoder.encode(this.password);
-  }
-
-  public void updateRefreshToken(String updateRefreshToken) {
-    this.refreshToken = updateRefreshToken;
-  }
-
-  public static Member fromSignUpDto (MemberSignUpRequest memberSignUpRequest) {
+  public static Member fromSignUpDto(MemberSignUpRequest memberSignUpRequest) {
     return Member.builder()
         .authType(AuthType.EMAIL)
         .email(memberSignUpRequest.getEmail())
         .password(memberSignUpRequest.getPassword())
         .name(memberSignUpRequest.getName())
         .role(Authority.USER)
-        .build();
-  }
-
-  public MemberEntity toEntity() {
-    return MemberEntity.builder()
-        .id(this.id)
-        .authType(this.authType)
-        .oauthId(this.oauthId)
-        .refreshToken(this.refreshToken)
-        .name(this.name)
-        .email(this.email)
-        .password(this.password)
-        .role(this.role)
-        .withdrawalAt(this.withdrawalAt)
         .build();
   }
 
@@ -95,6 +68,33 @@ public class Member implements UserDetails {
         .password(memberEntity.getPassword())
         .role(memberEntity.getRole())
         .withdrawalAt(memberEntity.getWithdrawalAt())
+        .build();
+  }
+
+  public void authorizeUser() {
+    this.role = Authority.USER;
+  }
+
+  // 비밀번호 암호화 메소드
+  public void passwordEncode(PasswordEncoder passwordEncoder) {
+    this.password = passwordEncoder.encode(this.password);
+  }
+
+  public void updateRefreshToken(String updateRefreshToken) {
+    this.refreshToken = updateRefreshToken;
+  }
+
+  public MemberEntity toEntity() {
+    return MemberEntity.builder()
+        .id(this.id)
+        .authType(this.authType)
+        .oauthId(this.oauthId)
+        .refreshToken(this.refreshToken)
+        .name(this.name)
+        .email(this.email)
+        .password(this.password)
+        .role(this.role)
+        .withdrawalAt(this.withdrawalAt)
         .build();
   }
 

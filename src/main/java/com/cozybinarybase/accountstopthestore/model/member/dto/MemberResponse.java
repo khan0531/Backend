@@ -1,11 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.member.dto;
 
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.AuthType;
-import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authority;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
-import java.time.LocalDateTime;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
