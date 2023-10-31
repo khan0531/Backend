@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class AssetSaveRequestDto {
+public class AssetUpdateRequestDto {
 
   private AssetType assetType;
 

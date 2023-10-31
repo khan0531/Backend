@@ -4,6 +4,8 @@ import com.cozybinarybase.accountstopthestore.common.handler.exception.CustomApi
 import com.cozybinarybase.accountstopthestore.model.asset.domain.Asset;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEntity;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
@@ -37,5 +39,22 @@ public class AssetService {
     AssetEntity assetEntity = asset.save(requestDto, memberEntity);
 
     return AssetSaveResponseDto.fromEntity(assetEntity);
+  }
+
+  @Transactional
+  public AssetUpdateResponseDto updateAsset(
+      Long memberId, Long assetId, AssetUpdateRequestDto requestDto, Member member
+  ) {
+    if (!Objects.equals(memberId, member.getId())) {
+      throw new CustomApiException("회원 정보가 일치하지 않습니다.");
+    }
+
+    memberRepository.findById(memberId).orElseThrow(
+        () -> new CustomApiException("찾을 수 없는 회원 번호입니다.")
+    );
+
+    AssetEntity assetEntity = asset.update(assetId, requestDto);
+
+    return AssetUpdateResponseDto.fromEntity(assetEntity);
   }
 }

@@ -3,6 +3,8 @@ package com.cozybinarybase.accountstopthestore.model.asset.controller;
 import com.cozybinarybase.accountstopthestore.common.dto.ResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.service.AssetService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import javax.validation.Valid;
@@ -13,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +38,22 @@ public class AssetController {
 
     return new ResponseEntity<>(
         new ResponseDto<>(true, "자산 추가", responseDto), HttpStatus.CREATED
+    );
+  }
+
+  @PutMapping("/{memberId}/assets/{assetId}")
+  public ResponseEntity<?> updateAsset(
+      @PathVariable Long memberId,
+      @PathVariable Long assetId,
+      @RequestBody @Valid AssetUpdateRequestDto requestDto,
+      BindingResult bindingResult,
+      @AuthenticationPrincipal Member member
+  ) {
+    AssetUpdateResponseDto responseDto =
+        assetService.updateAsset(memberId, assetId, requestDto, member);
+
+    return new ResponseEntity<>(
+        new ResponseDto<>(true, "자산 수정", responseDto), HttpStatus.OK
     );
   }
 }

@@ -55,4 +55,11 @@ public class AssetEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member")
   private MemberEntity member;
+
+  public void update(AssetType assetType, String assetName, Long amount, String memo) {
+    this.type = assetType;
+    this.name = assetName;
+    this.amount = amount;
+    this.memo = memo;
+  }
 }
