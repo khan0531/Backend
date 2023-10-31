@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/account_book
+    username:
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+JWT:
+  SECRET: ${JWT_SECRET:secret}
+  EXPIRATION_TIME: ${JWT_EXPIRATION_TIME:864000000}
