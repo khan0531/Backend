@@ -1,17 +1,30 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
     driver-class-name: org.h2.Driver
+    h2:
+      console:
+        enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+            scope:
+              - profile
+              - email
 
-JWT:
-  SECRET: ${JWT_SECRET:secret}
-  EXPIRATION_TIME: ${JWT_EXPIRATION_TIME:864000000}
+jwt:
+  secretKey: SeCrEtKeY4HaShInG
+  access:
+    expiration: 3600000
+  refresh:
+    expiration: 1209600000

@@ -6,11 +6,24 @@ spring:
       ddl-auto: update
     show-sql: true
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/account_book
-    username:
-    password:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/demo
+    username: root
+    password: 7845120qwe
     driver-class-name: com.mysql.cj.jdbc.Driver
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+            scope:
+              - profile
+              - email
 
-JWT:
-  SECRET: ${JWT_SECRET:secret}
-  EXPIRATION_TIME: ${JWT_EXPIRATION_TIME:864000000}
+jwt:
+  secretKey: SeCrEtKeY4HaShInG
+  access:
+    expiration: 3600000
+  refresh:
+    expiration: 1209600000
