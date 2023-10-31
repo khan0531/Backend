@@ -2,6 +2,7 @@ package com.cozybinarybase.accountstopthestore.model.asset.controller;
 
 import com.cozybinarybase.accountstopthestore.common.dto.ResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetDeleteResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -71,6 +73,21 @@ public class AssetController {
 
     return new ResponseEntity<>(
         new ResponseDto<>(true, "자산 삭제", responseDto), HttpStatus.OK
+    );
+  }
+
+  @GetMapping("/{memberId}/assets/{assetId}")
+  public ResponseEntity<?> getAsset(
+      @PathVariable Long memberId,
+      @PathVariable Long assetId,
+      BindingResult bindingResult,
+      @AuthenticationPrincipal Member member
+  ) {
+    AssetResponseDto responseDto =
+        assetService.getAsset(memberId, assetId, member);
+
+    return new ResponseEntity<>(
+        new ResponseDto<>(true, "자산 상세 조회", responseDto), HttpStatus.OK
     );
   }
 }

@@ -52,4 +52,11 @@ public class Asset {
 
     return assetId;
   }
+
+  public AssetEntity get(Long assetId) {
+
+    return assetRepository.findById(assetId).orElseThrow(
+        () -> new CustomApiException("찾을 수 없는 자산 번호입니다.")
+    );
+  }
 }
