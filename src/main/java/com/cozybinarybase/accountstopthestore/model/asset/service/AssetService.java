@@ -6,14 +6,19 @@ import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetDeleteRespons
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSearchTypeListResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSearchTypeResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEntity;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,7 +84,6 @@ public class AssetService {
 
   @Transactional(readOnly = true)
   public AssetResponseDto getAsset(Long memberId, Long assetId, Member member) {
-
     if (!Objects.equals(memberId, member.getId())) {
       throw new CustomApiException("회원 정보가 일치하지 않습니다.");
     }
@@ -91,5 +95,24 @@ public class AssetService {
     AssetEntity assetEntity = asset.get(assetId);
 
     return AssetResponseDto.fromEntity(assetEntity);
+  }
+
+  public AssetSearchTypeListResponseDto searchAssetType(
+      Long memberId, AssetType assetType, int page, int limit, Member member
+  ) {
+    if (!Objects.equals(memberId, member.getId())) {
+      throw new CustomApiException("회원 정보가 일치하지 않습니다.");
+    }
+
+    memberRepository.findById(memberId).orElseThrow(
+        () -> new CustomApiException("찾을 수 없는 회원 번호입니다.")
+    );
+
+    List<AssetEntity> assetEntityList = asset.searchType(assetType, page, limit);
+    List<AssetSearchTypeResponseDto> assetSearchTypeResponseDtoList = assetEntityList.stream()
+        .map(AssetSearchTypeResponseDto::fromEntity)
+        .collect(Collectors.toList());
+
+    return AssetSearchTypeListResponseDto.of(memberId, assetSearchTypeResponseDtoList);
   }
 }

@@ -5,8 +5,10 @@ import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetDeleteRespons
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSearchTypeListResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
 import com.cozybinarybase.accountstopthestore.model.asset.service.AssetService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import javax.validation.Valid;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -65,7 +68,6 @@ public class AssetController {
   public ResponseEntity<?> deleteAsset(
       @PathVariable Long memberId,
       @PathVariable Long assetId,
-      BindingResult bindingResult,
       @AuthenticationPrincipal Member member
   ) {
     AssetDeleteResponseDto responseDto =
@@ -80,7 +82,6 @@ public class AssetController {
   public ResponseEntity<?> getAsset(
       @PathVariable Long memberId,
       @PathVariable Long assetId,
-      BindingResult bindingResult,
       @AuthenticationPrincipal Member member
   ) {
     AssetResponseDto responseDto =
@@ -88,6 +89,22 @@ public class AssetController {
 
     return new ResponseEntity<>(
         new ResponseDto<>(true, "자산 상세 조회", responseDto), HttpStatus.OK
+    );
+  }
+
+  @GetMapping("/{memberId}/assets")
+  public ResponseEntity<?> searchAssetType(
+      @PathVariable Long memberId,
+      @RequestParam AssetType assetType,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int limit,
+      @AuthenticationPrincipal Member member
+  ) {
+    AssetSearchTypeListResponseDto responseDto =
+        assetService.searchAssetType(memberId, assetType, page, limit, member);
+
+    return new ResponseEntity<>(
+        new ResponseDto<>(true, "자산 조회", responseDto), HttpStatus.OK
     );
   }
 }
