@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetDeleteResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
@@ -94,5 +95,35 @@ class AssetTest {
 
     // then
     assertThat(assetUpdateResponseDto.getAssetName()).isEqualTo("월급");
+  }
+
+  @Test
+  void 자산_삭제_test() throws Exception {
+    // given
+    MemberEntity hong = new MemberEntity();
+    hong.setId(1L);
+    hong.setName("홍길동");
+    hong.setEmail("test@test.com");
+
+    // stub 1
+    AssetEntity assetEntity = AssetEntity.builder()
+        .id(1L)
+        .type(AssetType.MONEY)
+        .name("현금")
+        .member(hong)
+        .build();
+    when(assetRepository.findById(any())).thenReturn(Optional.of(assetEntity));
+
+    // when
+    Long assetId = asset.delete(1L);
+
+    String responseBody = objectMapper.writeValueAsString(AssetDeleteResponseDto.builder()
+        .assetId(assetId)
+        .build()
+    );
+    System.out.println("테스트: " + responseBody);
+
+    // then
+    assertThat(assetId).isEqualTo(1L);
   }
 }
