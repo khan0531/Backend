@@ -1,6 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.asset.controller;
 
 import com.cozybinarybase.accountstopthestore.common.dto.ResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetDeleteResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -54,6 +56,21 @@ public class AssetController {
 
     return new ResponseEntity<>(
         new ResponseDto<>(true, "자산 수정", responseDto), HttpStatus.OK
+    );
+  }
+
+  @DeleteMapping("/{memberId}/assets/{assetId}")
+  public ResponseEntity<?> deleteAsset(
+      @PathVariable Long memberId,
+      @PathVariable Long assetId,
+      BindingResult bindingResult,
+      @AuthenticationPrincipal Member member
+  ) {
+    AssetDeleteResponseDto responseDto =
+        assetService.deleteAsset(memberId, assetId, member);
+
+    return new ResponseEntity<>(
+        new ResponseDto<>(true, "자산 삭제", responseDto), HttpStatus.OK
     );
   }
 }

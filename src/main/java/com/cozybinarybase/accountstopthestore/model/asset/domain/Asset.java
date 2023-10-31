@@ -42,4 +42,14 @@ public class Asset {
 
     return assetEntity;
   }
+
+  public Long delete(Long assetId) {
+    AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
+        () -> new CustomApiException("찾을 수 없는 자산 번호입니다.")
+    );
+
+    assetRepository.delete(assetEntity);
+
+    return assetId;
+  }
 }
