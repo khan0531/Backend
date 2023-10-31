@@ -30,6 +30,10 @@ dependencies {
 	implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.3'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
+	// swagger
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	runtimeOnly 'com.h2database:h2'
 
