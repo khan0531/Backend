@@ -37,6 +37,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .and()
         .authorizeRequests()
         .antMatchers("/**/sign-up", "/**/sign-in").permitAll()
+        .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
         .anyRequest().authenticated()
 
         .and()
@@ -52,11 +53,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Override
   public void configure(final WebSecurity web) throws Exception {
     web.ignoring()
-        .antMatchers("/mysql-console/**");
+        .antMatchers("/mysql-console/**", "/v2/api-docs", "/configuration/ui",
+            "/swagger-resources", "/configuration/security",
+            "/swagger-ui.html", "/webjars/**", "/swagger/**");
   }
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+  public AuthenticationManager authenticationManager(
+      AuthenticationConfiguration authenticationConfiguration)
       throws Exception {
     return authenticationConfiguration.getAuthenticationManager();
   }

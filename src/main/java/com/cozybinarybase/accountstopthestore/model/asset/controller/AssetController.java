@@ -11,6 +11,7 @@ import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRespons
 import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
 import com.cozybinarybase.accountstopthestore.model.asset.service.AssetService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import io.swagger.v3.oas.annotations.Operation;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+//@Tag(name = "Asset API", description = "자산 관련 API 정보를 담고 있습니다.")
 @RequiredArgsConstructor
 @RequestMapping("/members")
 @RestController
@@ -34,6 +36,7 @@ public class AssetController {
 
   private final AssetService assetService;
 
+  @Operation(summary = "자산 추가", description = "유저가 자산을 추가할 때 사용되는 API")
   @PostMapping("/{memberId}/assets")
   public ResponseEntity<?> saveAsset(
       @PathVariable Long memberId,
@@ -48,6 +51,7 @@ public class AssetController {
     );
   }
 
+  @Operation(summary = "자산 수정", description = "유저가 자산을 수정할 때 사용되는 API")
   @PutMapping("/{memberId}/assets/{assetId}")
   public ResponseEntity<?> updateAsset(
       @PathVariable Long memberId,
@@ -64,6 +68,7 @@ public class AssetController {
     );
   }
 
+  @Operation(summary = "자산 삭제", description = "유저가 자산을 삭제할 때 사용되는 API")
   @DeleteMapping("/{memberId}/assets/{assetId}")
   public ResponseEntity<?> deleteAsset(
       @PathVariable Long memberId,
@@ -78,6 +83,7 @@ public class AssetController {
     );
   }
 
+  @Operation(summary = "자산 상세 조회", description = "유저가 자산을 상세 조회할 때 사용되는 API")
   @GetMapping("/{memberId}/assets/{assetId}")
   public ResponseEntity<?> getAsset(
       @PathVariable Long memberId,
@@ -92,6 +98,7 @@ public class AssetController {
     );
   }
 
+  @Operation(summary = "자산 조회", description = "유저가 자산을 조회할 때 사용되는 API")
   @GetMapping("/{memberId}/assets")
   public ResponseEntity<?> searchAssetType(
       @PathVariable Long memberId,
