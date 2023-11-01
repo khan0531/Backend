@@ -1,5 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.member.service;
 
+import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberMismatchException;
+import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotFoundException;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.dto.MemberResponse;
 import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignInRequest;
@@ -7,6 +9,7 @@ import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignUpReque
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
+import java.util.Objects;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -64,5 +67,15 @@ public class MemberService implements UserDetailsService {
     String accessToken = this.tokenProvider.generateAccessToken(member);
     String refreshToken = this.tokenProvider.generateRefreshToken();
     this.tokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+  }
+
+  public MemberEntity validateAndGetMember(Long memberId, Member member) {
+    if (!Objects.equals(memberId, member.getId())) {
+      throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
+    }
+
+    return memberRepository.findById(memberId).orElseThrow(
+        () -> new MemberNotFoundException("찾을 수 없는 회원 번호입니다.")
+    );
   }
 }

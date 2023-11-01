@@ -1,4 +1,4 @@
-package com.cozybinarybase.accountstopthestore.common.exception;
+package com.cozybinarybase.accountstopthestore.common.handler.exception;
 
 public class MemberNotFoundException extends RuntimeException {
 

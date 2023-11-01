@@ -1,7 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.asset.service;
 
-import com.cozybinarybase.accountstopthestore.common.exception.MemberMismatchException;
-import com.cozybinarybase.accountstopthestore.common.exception.MemberNotFoundException;
+import com.cozybinarybase.accountstopthestore.common.handler.exception.AssetNotFoundException;
 import com.cozybinarybase.accountstopthestore.model.asset.domain.Asset;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetDeleteResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetResponseDto;
@@ -16,11 +15,11 @@ import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEn
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
-import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
+import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,22 +28,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class AssetService {
 
   private final AssetRepository assetRepository;
-  private final MemberRepository memberRepository;
+  private final MemberService memberService;
   private final Asset asset;
 
   @Transactional
   public AssetSaveResponseDto saveAsset(
       Long memberId, AssetSaveRequestDto requestDto, Member member
   ) {
-    if (!Objects.equals(memberId, member.getId())) {
-      throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
-    }
+    MemberEntity memberEntity = memberService.validateAndGetMember(memberId, member);
 
-    MemberEntity memberEntity = memberRepository.findById(memberId).orElseThrow(
-        () -> new MemberNotFoundException("찾을 수 없는 회원 번호입니다.")
-    );
-
-    AssetEntity assetEntity = asset.save(requestDto, memberEntity);
+    AssetEntity assetEntity = assetRepository.save(asset.createAsset(requestDto, memberEntity));
 
     return AssetSaveResponseDto.fromEntity(assetEntity);
   }
@@ -53,63 +46,52 @@ public class AssetService {
   public AssetUpdateResponseDto updateAsset(
       Long memberId, Long assetId, AssetUpdateRequestDto requestDto, Member member
   ) {
-    if (!Objects.equals(memberId, member.getId())) {
-      throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
-    }
+    memberService.validateAndGetMember(memberId, member);
 
-    memberRepository.findById(memberId).orElseThrow(
-        () -> new MemberNotFoundException("찾을 수 없는 회원 번호입니다.")
+    AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
+        () -> new AssetNotFoundException("찾을 수 없는 자산 번호입니다.")
     );
 
-    AssetEntity assetEntity = asset.update(assetId, requestDto);
+    asset.update(assetEntity, requestDto);
 
     return AssetUpdateResponseDto.fromEntity(assetEntity);
   }
 
   @Transactional
   public AssetDeleteResponseDto deleteAsset(Long memberId, Long assetId, Member member) {
-    if (!Objects.equals(memberId, member.getId())) {
-      throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
-    }
+    memberService.validateAndGetMember(memberId, member);
 
-    memberRepository.findById(memberId).orElseThrow(
-        () -> new MemberNotFoundException("찾을 수 없는 회원 번호입니다.")
+    AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
+        () -> new AssetNotFoundException("찾을 수 없는 자산 번호입니다.")
     );
 
-    Long id = asset.delete(assetId);
+    assetRepository.delete(assetEntity);
 
     return AssetDeleteResponseDto.builder()
-        .assetId(id)
+        .assetId(assetId)
         .build();
   }
 
   @Transactional(readOnly = true)
   public AssetResponseDto getAsset(Long memberId, Long assetId, Member member) {
-    if (!Objects.equals(memberId, member.getId())) {
-      throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
-    }
+    memberService.validateAndGetMember(memberId, member);
 
-    memberRepository.findById(memberId).orElseThrow(
-        () -> new MemberNotFoundException("찾을 수 없는 회원 번호입니다.")
+    AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
+        () -> new AssetNotFoundException("찾을 수 없는 자산 번호입니다.")
     );
-
-    AssetEntity assetEntity = asset.get(assetId);
 
     return AssetResponseDto.fromEntity(assetEntity);
   }
 
+  @Transactional(readOnly = true)
   public AssetSearchTypeListResponseDto searchAssetType(
       Long memberId, AssetType assetType, int page, int limit, Member member
   ) {
-    if (!Objects.equals(memberId, member.getId())) {
-      throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
-    }
+    memberService.validateAndGetMember(memberId, member);
 
-    memberRepository.findById(memberId).orElseThrow(
-        () -> new MemberNotFoundException("찾을 수 없는 회원 번호입니다.")
-    );
-
-    List<AssetEntity> assetEntityList = asset.searchType(assetType, page, limit);
+    PageRequest pageRequest = PageRequest.of(page, limit);
+    List<AssetEntity> assetEntityList =
+        assetRepository.findByType(assetType, pageRequest).getContent();
     List<AssetSearchTypeResponseDto> assetSearchTypeResponseDtoList = assetEntityList.stream()
         .map(AssetSearchTypeResponseDto::fromEntity)
         .collect(Collectors.toList());
