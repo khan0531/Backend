@@ -14,7 +14,6 @@ import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetTyp
 import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEntity;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
-import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,9 +34,10 @@ public class AssetService {
   public AssetSaveResponseDto saveAsset(
       Long memberId, AssetSaveRequestDto requestDto, Member member
   ) {
-    MemberEntity memberEntity = memberService.validateAndGetMember(memberId, member);
+    memberService.validateAndGetMember(memberId, member);
 
-    AssetEntity assetEntity = assetRepository.save(asset.createAsset(requestDto, memberEntity));
+    AssetEntity assetEntity =
+        assetRepository.save(asset.createAsset(requestDto, memberId).toEntity());
 
     return AssetSaveResponseDto.fromEntity(assetEntity);
   }
@@ -52,7 +52,7 @@ public class AssetService {
         () -> new AssetNotFoundException("찾을 수 없는 자산 번호입니다.")
     );
 
-    asset.update(assetEntity, requestDto);
+    asset.update(requestDto);
 
     return AssetUpdateResponseDto.fromEntity(assetEntity);
   }

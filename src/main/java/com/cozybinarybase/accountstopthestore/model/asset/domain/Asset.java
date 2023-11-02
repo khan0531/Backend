@@ -2,31 +2,60 @@ package com.cozybinarybase.accountstopthestore.model.asset.domain;
 
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
-import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Component
-@RequiredArgsConstructor
 public class Asset {
 
-  public AssetEntity createAsset(AssetSaveRequestDto requestDto, MemberEntity memberEntity) {
+  private Long id;
+  private AssetType type;
+  private String name;
+  private Long amount;
+  private String memo;
+  private Long memberId;
 
-    return AssetEntity.builder()
+  public Asset createAsset(AssetSaveRequestDto requestDto, Long memberId) {
+
+    return Asset.builder()
         .type(requestDto.getAssetType())
         .name(requestDto.getAssetName())
         .amount(requestDto.getAmount())
         .memo(requestDto.getMemo())
-        .member(memberEntity)
+        .memberId(memberId)
         .build();
   }
 
-  public void update(AssetEntity assetEntity, AssetUpdateRequestDto requestDto) {
-    Optional.ofNullable(requestDto.getAssetType()).ifPresent(assetEntity::setType);
-    Optional.ofNullable(requestDto.getAssetName()).ifPresent(assetEntity::setName);
-    Optional.ofNullable(requestDto.getAmount()).ifPresent(assetEntity::setAmount);
-    Optional.ofNullable(requestDto.getMemo()).ifPresent(assetEntity::setMemo);
+  public void update(AssetUpdateRequestDto requestDto) {
+    if (requestDto.getAssetType() != null) {
+      this.type = requestDto.getAssetType();
+    }
+    if (requestDto.getAssetName() != null) {
+      this.name = requestDto.getAssetName();
+    }
+    if (requestDto.getAmount() != null) {
+      this.amount = requestDto.getAmount();
+    }
+    if (requestDto.getMemo() != null) {
+      this.memo = requestDto.getMemo();
+    }
+  }
+
+  public AssetEntity toEntity() {
+    return AssetEntity.builder()
+        .type(this.type)
+        .name(this.name)
+        .amount(this.amount)
+        .memo(this.memo)
+        .member(MemberEntity.builder().id(this.memberId).build())
+        .build();
   }
 }

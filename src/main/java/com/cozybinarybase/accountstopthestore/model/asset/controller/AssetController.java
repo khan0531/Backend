@@ -8,6 +8,7 @@ import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseD
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSearchTypeListResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetWrapperResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
 import com.cozybinarybase.accountstopthestore.model.asset.service.AssetService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
@@ -16,7 +17,6 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,39 +37,38 @@ public class AssetController {
   private final AssetService assetService;
 
   @Operation(summary = "자산 추가", description = "유저가 자산을 추가할 때 사용되는 API")
-  @ResponseBody
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/{memberId}/assets")
   public ApiResponse<?> saveAsset(
       @PathVariable Long memberId,
       @RequestBody @Valid AssetSaveRequestDto requestDto,
-      BindingResult bindingResult,
       @AuthenticationPrincipal Member member
   ) {
     AssetSaveResponseDto responseDto = assetService.saveAsset(memberId, requestDto, member);
+    AssetWrapperResponseDto<AssetSaveResponseDto> wrapperResponseDto =
+        new AssetWrapperResponseDto<>(responseDto);
 
-    return ApiResponse.success(responseDto);
+    return ApiResponse.success(wrapperResponseDto);
   }
 
   @Operation(summary = "자산 수정", description = "유저가 자산을 수정할 때 사용되는 API")
-  @ResponseBody
   @ResponseStatus(HttpStatus.OK)
   @PutMapping("/{memberId}/assets/{assetId}")
   public ApiResponse<?> updateAsset(
       @PathVariable Long memberId,
       @PathVariable Long assetId,
       @RequestBody @Valid AssetUpdateRequestDto requestDto,
-      BindingResult bindingResult,
       @AuthenticationPrincipal Member member
   ) {
     AssetUpdateResponseDto responseDto =
         assetService.updateAsset(memberId, assetId, requestDto, member);
+    AssetWrapperResponseDto<AssetUpdateResponseDto> wrapperResponseDto =
+        new AssetWrapperResponseDto<>(responseDto);
 
-    return ApiResponse.success(responseDto);
+    return ApiResponse.success(wrapperResponseDto);
   }
 
   @Operation(summary = "자산 삭제", description = "유저가 자산을 삭제할 때 사용되는 API")
-  @ResponseBody
   @ResponseStatus(HttpStatus.OK)
   @DeleteMapping("/{memberId}/assets/{assetId}")
   public ApiResponse<?> deleteAsset(
@@ -80,12 +78,13 @@ public class AssetController {
   ) {
     AssetDeleteResponseDto responseDto =
         assetService.deleteAsset(memberId, assetId, member);
+    AssetWrapperResponseDto<AssetDeleteResponseDto> wrapperResponseDto =
+        new AssetWrapperResponseDto<>(responseDto);
 
-    return ApiResponse.success(responseDto);
+    return ApiResponse.success(wrapperResponseDto);
   }
 
   @Operation(summary = "자산 상세 조회", description = "유저가 자산을 상세 조회할 때 사용되는 API")
-  @ResponseBody
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/{memberId}/assets/{assetId}")
   public ApiResponse<?> getAsset(
@@ -95,12 +94,13 @@ public class AssetController {
   ) {
     AssetResponseDto responseDto =
         assetService.getAsset(memberId, assetId, member);
+    AssetWrapperResponseDto<AssetResponseDto> wrapperResponseDto =
+        new AssetWrapperResponseDto<>(responseDto);
 
-    return ApiResponse.success(responseDto);
+    return ApiResponse.success(wrapperResponseDto);
   }
 
   @Operation(summary = "자산 조회", description = "유저가 자산을 조회할 때 사용되는 API")
-  @ResponseBody
   @ResponseStatus(HttpStatus.OK)
   @GetMapping("/{memberId}/assets")
   public ApiResponse<?> searchAssetType(
@@ -112,7 +112,9 @@ public class AssetController {
   ) {
     AssetSearchTypeListResponseDto responseDto =
         assetService.searchAssetType(memberId, assetType, page, limit, member);
+    AssetWrapperResponseDto<AssetSearchTypeListResponseDto> wrapperResponseDto =
+        new AssetWrapperResponseDto<>(responseDto);
 
-    return ApiResponse.success(responseDto);
+    return ApiResponse.success(wrapperResponseDto);
   }
 }

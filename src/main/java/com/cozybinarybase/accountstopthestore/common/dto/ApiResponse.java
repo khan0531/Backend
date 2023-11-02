@@ -1,11 +1,13 @@
 package com.cozybinarybase.accountstopthestore.common.dto;
 
 import com.cozybinarybase.accountstopthestore.common.handler.type.StatusType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
   private final StatusType status;
@@ -20,7 +22,7 @@ public class ApiResponse<T> {
     return new ApiResponse<>(StatusType.FAIL, null, data);
   }
 
-  public static <T> ApiResponse<T> error(String message, T data) {
-    return new ApiResponse<>(StatusType.ERROR, message, data);
+  public static <T> ApiResponse<T> error(String message) {
+    return new ApiResponse<>(StatusType.ERROR, message, null);
   }
 }
