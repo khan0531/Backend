@@ -1,6 +1,5 @@
 package com.cozybinarybase.accountstopthestore.model.asset.service;
 
-import com.cozybinarybase.accountstopthestore.common.handler.exception.AssetNotFoundException;
 import com.cozybinarybase.accountstopthestore.model.asset.domain.Asset;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetDeleteResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetResponseDto;
@@ -11,6 +10,7 @@ import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSearchTypeRes
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
+import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotFoundException;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEntity;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
@@ -49,12 +49,16 @@ public class AssetService {
     memberService.validateAndGetMember(memberId, member);
 
     AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
-        () -> new AssetNotFoundException("찾을 수 없는 자산 번호입니다.")
+        AssetNotFoundException::new
     );
 
-    asset.update(requestDto);
+    Asset assetDomain = Asset.fromEntity(assetEntity);
+    assetDomain.update(requestDto);
 
-    return AssetUpdateResponseDto.fromEntity(assetEntity);
+    AssetEntity updateAssetEntity = assetDomain.toEntity();
+    assetRepository.save(updateAssetEntity);
+
+    return AssetUpdateResponseDto.fromEntity(updateAssetEntity);
   }
 
   @Transactional
@@ -62,7 +66,7 @@ public class AssetService {
     memberService.validateAndGetMember(memberId, member);
 
     AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
-        () -> new AssetNotFoundException("찾을 수 없는 자산 번호입니다.")
+        AssetNotFoundException::new
     );
 
     assetRepository.delete(assetEntity);
@@ -77,7 +81,7 @@ public class AssetService {
     memberService.validateAndGetMember(memberId, member);
 
     AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
-        () -> new AssetNotFoundException("찾을 수 없는 자산 번호입니다.")
+        AssetNotFoundException::new
     );
 
     return AssetResponseDto.fromEntity(assetEntity);

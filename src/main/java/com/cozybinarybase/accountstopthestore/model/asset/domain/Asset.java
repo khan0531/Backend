@@ -7,12 +7,14 @@ import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEn
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 @Component
 public class Asset {
 
@@ -51,11 +53,23 @@ public class Asset {
 
   public AssetEntity toEntity() {
     return AssetEntity.builder()
+        .id(this.id)
         .type(this.type)
         .name(this.name)
         .amount(this.amount)
         .memo(this.memo)
         .member(MemberEntity.builder().id(this.memberId).build())
+        .build();
+  }
+
+  public static Asset fromEntity(AssetEntity assetEntity) {
+    return Asset.builder()
+        .id(assetEntity.getId())
+        .type(assetEntity.getType())
+        .name(assetEntity.getName())
+        .amount(assetEntity.getAmount())
+        .memo(assetEntity.getMemo())
+        .memberId(assetEntity.getMember().getId())
         .build();
   }
 }

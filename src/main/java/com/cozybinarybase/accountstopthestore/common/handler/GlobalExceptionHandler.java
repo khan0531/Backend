@@ -3,9 +3,9 @@ package com.cozybinarybase.accountstopthestore.common.handler;
 import com.cozybinarybase.accountstopthestore.common.annotation.FailName;
 import com.cozybinarybase.accountstopthestore.common.dto.ApiResponse;
 import com.cozybinarybase.accountstopthestore.common.dto.FailDetailDto;
-import com.cozybinarybase.accountstopthestore.common.handler.exception.AssetNotFoundException;
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberMismatchException;
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotFoundException;
+import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotFoundException;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,13 +45,14 @@ public class GlobalExceptionHandler {
 
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ExceptionHandler(AssetNotFoundException.class)
-  public ApiResponse<FailDetailDto> assetNotFoundException(AssetNotFoundException e) {
+  public ResponseEntity<ApiResponse<?>> assetNotFoundException(AssetNotFoundException e) {
     log.error(e.getMessage());
 
     FailDetailDto failDetail = new FailDetailDto();
-    failDetail.nestedError("asset").addFieldError("assetId", e.getMessage());
+    failDetail.addFieldError("assetId", e.getMessage());
 
-    return ApiResponse.fail(failDetail);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiResponse.fail(Map.of("asset", failDetail.getErrors())));
   }
 
   @ResponseStatus(HttpStatus.BAD_REQUEST)
