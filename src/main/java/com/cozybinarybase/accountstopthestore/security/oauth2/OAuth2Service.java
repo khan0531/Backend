@@ -1,6 +1,5 @@
 package com.cozybinarybase.accountstopthestore.security.oauth2;
 
-import com.cozybinarybase.accountstopthestore.model.member.dto.constants.AuthType;
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authority;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
@@ -34,21 +33,17 @@ public class OAuth2Service implements OAuth2UserService<OAuth2UserRequest, OAuth
 
     String email = (String) attributes.get("email");
 
-    MemberEntity member = memberRepository.findByEmail(email)
-        .orElseGet(() -> memberRepository.save(
-            MemberEntity.builder()
-                .authType(AuthType.GOOGLE)
-                .name((String) attributes.get("name"))
-                .email(email)
-                .role(Authority.USER)
-                .build()
-        ));
-
-    return new CustomOAuth2User(
-        Collections.singleton(new SimpleGrantedAuthority(member.getRole().name())),
+    CustomOAuth2User customOAuth2User = new CustomOAuth2User(
+        Collections.singleton(new SimpleGrantedAuthority(Authority.USER.name())),
         attributes,
         userNameAttributeName
     );
+
+    MemberEntity member = memberRepository.findByEmail(email)
+        .orElseGet(() -> memberRepository.save(
+            customOAuth2User.toEntity()
+        ));
+
+    return customOAuth2User;
   }
 }
-
