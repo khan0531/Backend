@@ -2,6 +2,7 @@ package com.cozybinarybase.accountstopthestore.model.category.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.cozybinarybase.accountstopthestore.model.category.domain.Category;
@@ -15,7 +16,6 @@ import com.cozybinarybase.accountstopthestore.model.category.persist.repository.
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authority;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
-import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -32,9 +32,6 @@ class CategoryServiceTest {
 
   @Mock
   private MemberService memberService;
-
-  @Mock
-  private MemberRepository memberRepository;
 
   @Mock
   private CategoryRepository categoryRepository;
@@ -129,5 +126,39 @@ class CategoryServiceTest {
     // then
     assertEquals("적금", responseDto.getCategoryName());
     assertEquals("지출", responseDto.getCategoryType());
+  }
+
+  @Test
+  void 카테고리_삭제_test() throws Exception {
+    // given
+    CategoryUpdateRequestDto requestDto = new CategoryUpdateRequestDto();
+    requestDto.setCategoryName("적금");
+    requestDto.setCategoryType(CategoryType.SPENDING);
+
+    MemberEntity member = new MemberEntity();
+    member.setId(1L);
+    member.setRole(Authority.USER);
+    member.setEmail("test@test.com");
+    member.setPassword("1234");
+    member.setName("홍길동");
+    Member loginMember = Member.fromEntity(member);
+
+    CategoryEntity savedCategory = new CategoryEntity();
+    savedCategory.setId(1L);
+    savedCategory.setName("월급");
+    savedCategory.setType(CategoryType.INCOME);
+    savedCategory.setMember(member);
+
+    // stub 1
+    when(memberService.validateAndGetMember(1L, loginMember)).thenReturn(member);
+
+    // stub 2
+    when(categoryRepository.findById(any())).thenReturn(Optional.of(savedCategory));
+
+    // when
+    categoryService.deleteCategory(1L, 1L, loginMember);
+
+    // then
+    verify(categoryRepository).delete(savedCategory);
   }
 }
