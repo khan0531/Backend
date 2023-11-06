@@ -1,17 +1,13 @@
 package com.cozybinarybase.accountstopthestore.model.member.dto;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class MemberSignUpRequest {
-
-  @NotBlank(message = "이름을 입력해주세요.")
-  private String name;
+public class MemberSignInRequestDto {
 
   @Email(message = "이메일 형식이 아닙니다.")
   private String email;

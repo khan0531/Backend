@@ -1,5 +1,8 @@
 package com.cozybinarybase.accountstopthestore.security.oauth2;
 
+import com.cozybinarybase.accountstopthestore.model.member.dto.constants.AuthType;
+import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authority;
+import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import java.util.Collection;
 import java.util.Map;
 import lombok.Getter;
@@ -22,5 +25,14 @@ public class CustomOAuth2User extends DefaultOAuth2User {
       String nameAttributeKey) {
     super(authorities, attributes, nameAttributeKey);
     this.email = (String) attributes.get("email");
+  }
+
+  public MemberEntity toEntity() {
+    return MemberEntity.builder()
+        .authType(AuthType.GOOGLE)
+        .name((String) getAttributes().get("name"))
+        .email((String) getAttributes().get("email"))
+        .role(Authority.USER)
+        .build();
   }
 }

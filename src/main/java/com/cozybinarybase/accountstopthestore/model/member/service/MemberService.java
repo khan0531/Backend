@@ -3,9 +3,9 @@ package com.cozybinarybase.accountstopthestore.model.member.service;
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberMismatchException;
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotFoundException;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
-import com.cozybinarybase.accountstopthestore.model.member.dto.MemberResponse;
-import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignInRequest;
-import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignUpRequest;
+import com.cozybinarybase.accountstopthestore.model.member.dto.MemberResponseDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignInRequestDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignUpRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
@@ -35,7 +35,7 @@ public class MemberService implements UserDetailsService {
     return this.memberRepository.findByEmail(email)
         .map(Member::fromEntity)
         .map(member -> {
-          if (member.getPassword() == null){
+          if (member.getPassword() == null) {
             member.setPassword("123456789");
           }
           return member;
@@ -43,7 +43,7 @@ public class MemberService implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException("가입된 이메일이 아닙니다. -> " + email));
   }
 
-  public MemberResponse signUp(MemberSignUpRequest memberSignUpRequest) {
+  public MemberResponseDto signUp(MemberSignUpRequestDto memberSignUpRequest) {
 
     this.memberRepository.findByEmail(memberSignUpRequest.getEmail()).ifPresent(member -> {
       throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
@@ -53,12 +53,12 @@ public class MemberService implements UserDetailsService {
     member.passwordEncode(this.passwordEncoder);
     MemberEntity memberEntity = this.memberRepository.save(member.toEntity());
 
-    return MemberResponse.fromEntity(memberEntity);
+    return MemberResponseDto.fromEntity(memberEntity);
   }
 
-  public void signIn(MemberSignInRequest memberSignInRequest) {
-    Member member = (Member) this.loadUserByUsername(memberSignInRequest.getEmail());
-    if (!this.passwordEncoder.matches(memberSignInRequest.getPassword(), member.getPassword())) {
+  public void signIn(MemberSignInRequestDto memberSignInRequestDto) {
+    Member member = (Member) this.loadUserByUsername(memberSignInRequestDto.getEmail());
+    if (!this.passwordEncoder.matches(memberSignInRequestDto.getPassword(), member.getPassword())) {
       throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
     }
 

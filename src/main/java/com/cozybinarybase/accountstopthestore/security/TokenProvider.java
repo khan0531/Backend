@@ -1,11 +1,11 @@
 package com.cozybinarybase.accountstopthestore.security;
 
 
-import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.security.oauth2.CustomOAuth2User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TokenProvider {
 
-  public static final String TOKEN_HEADER = "Authorization";
+  public static final String ACCESS_TOKEN_HEADER = "Authorization";
   public static final String TOKEN_PREFIX = "Bearer ";
   private static final String REFRESH_TOKEN_HEADER = "Authorization-refresh";
   private final MemberRepository memberRepository;
@@ -37,13 +37,21 @@ public class TokenProvider {
   @Value("${jwt.refresh.expiration}")
   private Long refreshTokenExpirationPeriod;
 
+  private JwtParser jwtParser;
+
+  private synchronized JwtParser getJwtParser() {
+    if (this.jwtParser == null) {
+      this.jwtParser = Jwts.parser().setSigningKey(this.secretKey);
+    }
+    return this.jwtParser;
+  }
+
   private String generateAccessToken(String email) {
     Claims claims = Jwts.claims().setSubject(email);
 
     Date now = new Date();
     Date expireDate = new Date(now.getTime() + accessTokenExpirationPeriod);
 
-    // jwt 발급
     return Jwts.builder()
         .setClaims(claims)
         .setIssuedAt(now)
@@ -71,12 +79,12 @@ public class TokenProvider {
   }
 
   public String getUsername(String token) {
-    return Jwts.parser().setSigningKey(this.secretKey).parseClaimsJws(token).getBody().getSubject();
+    return getJwtParser().parseClaimsJws(token).getBody().getSubject();
   }
 
   public boolean validateToken(String token) {
     try {
-      Jws<Claims> claims = Jwts.parser().setSigningKey(this.secretKey).parseClaimsJws(token);
+      Jws<Claims> claims = getJwtParser().parseClaimsJws(token);
 
       return !claims.getBody().getExpiration().before(new Date());
     } catch (Exception e) {
@@ -84,27 +92,12 @@ public class TokenProvider {
     }
   }
 
-  public void updateRefreshToken(String email, String refreshToken) {
-    Member member = Member.fromEntity(
-        this.memberRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다.")));
-    member.updateRefreshToken(refreshToken);
-    this.memberRepository.save(member.toEntity());
-  }
-
   public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
     response.setStatus(HttpServletResponse.SC_OK);
 
-    setAccessTokenHeader(response, accessToken);
-    setRefreshTokenHeader(response, refreshToken);
-    log.info("Access Token, Refresh Token 헤더 설정 완료");
-  }
-
-  public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-    response.setHeader(TOKEN_HEADER, TOKEN_PREFIX + accessToken);
-  }
-
-  public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
+    response.setHeader(ACCESS_TOKEN_HEADER, TOKEN_PREFIX + accessToken);
     response.setHeader(REFRESH_TOKEN_HEADER, TOKEN_PREFIX + refreshToken);
+    log.info("Access Token, Refresh Token 헤더 설정 완료");
   }
 
   public Optional<String> extractRefreshToken(HttpServletRequest request) {
@@ -114,9 +107,8 @@ public class TokenProvider {
   }
 
   public Optional<String> extractAccessToken(HttpServletRequest request) {
-    return Optional.ofNullable(request.getHeader(TOKEN_HEADER))
+    return Optional.ofNullable(request.getHeader(ACCESS_TOKEN_HEADER))
         .filter(refreshToken -> refreshToken.startsWith(TOKEN_PREFIX))
         .map(refreshToken -> refreshToken.replace(TOKEN_PREFIX, ""));
   }
-
 }

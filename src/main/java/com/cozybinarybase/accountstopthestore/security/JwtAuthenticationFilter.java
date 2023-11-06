@@ -37,19 +37,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     if (refreshToken != null) {
       checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-      return; // RefreshToken을 보낸 경우에는 AccessToken을 재발급 하고 인증 처리는 하지 않게 하기위해 바로 return으로 필터 진행 막기
+      return;
     }
 
-    String accessToken = this.tokenProvider.extractAccessToken(request)
+    this.tokenProvider.extractAccessToken(request)
         .filter(tokenProvider::validateToken)
-        .orElse(null);
-
-    if (accessToken != null && tokenProvider.validateToken(accessToken)) {
-      Authentication auth = getAuthentication(accessToken);
-      SecurityContextHolder.getContext().setAuthentication(auth);
-
-      log.info(String.format("[%s] -> %s", this.tokenProvider.getUsername(accessToken), request.getRequestURI()));
-    }
+        .ifPresent(accessToken -> {
+          Authentication auth = getAuthentication(accessToken);
+          SecurityContextHolder.getContext().setAuthentication(auth);
+        });
 
     filterChain.doFilter(request, response);
   }
