@@ -1,7 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.member.service;
 
-import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberMismatchException;
-import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotFoundException;
+import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.dto.MemberResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignInRequestDto;
@@ -71,11 +70,11 @@ public class MemberService implements UserDetailsService {
 
   public MemberEntity validateAndGetMember(Long memberId, Member member) {
     if (!Objects.equals(memberId, member.getId())) {
-      throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
+      throw new MemberNotValidException();
     }
 
     return memberRepository.findById(memberId).orElseThrow(
-        () -> new MemberNotFoundException("찾을 수 없는 회원 번호입니다.")
+        () -> new MemberNotValidException()
     );
   }
 }
