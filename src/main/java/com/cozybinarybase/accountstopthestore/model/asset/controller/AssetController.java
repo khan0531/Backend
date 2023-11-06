@@ -8,8 +8,8 @@ import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSearchTypeLis
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
-import com.cozybinarybase.accountstopthestore.model.asset.service.AssetService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import com.cozybinarybase.accountstopthestore.model.asset.service.AssetService;
 import io.swagger.v3.oas.annotations.Operation;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -97,12 +97,13 @@ public class AssetController {
   public ResponseEntity<AssetSearchTypeListResponseDto> searchAssetType(
       @PathVariable Long memberId,
       @RequestParam AssetType assetType,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int limit,
+      @RequestParam(defaultValue = "0") int page, // max값 설정
+      @RequestParam(defaultValue = "10") int limit, // max값 설정
       @AuthenticationPrincipal Member member
   ) {
     AssetSearchTypeListResponseDto responseDto =
         assetService.searchAssetType(memberId, assetType, page, limit, member);
+    // 서비스 로직에 자산 이름 유효성 검사하는 부분 빠져있습니다.
 
     return ResponseEntity.ok(responseDto);
   }

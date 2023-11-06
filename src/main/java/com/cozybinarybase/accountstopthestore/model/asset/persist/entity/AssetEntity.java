@@ -62,4 +62,5 @@ public class AssetEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member")
   private MemberEntity member;
+
 }

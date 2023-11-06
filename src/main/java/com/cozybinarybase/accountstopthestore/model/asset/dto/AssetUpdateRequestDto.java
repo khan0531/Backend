@@ -1,6 +1,5 @@
 package com.cozybinarybase.accountstopthestore.model.asset.dto;
 
-import com.cozybinarybase.accountstopthestore.common.annotation.FailName;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
@@ -9,7 +8,6 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@FailName("asset")
 public class AssetUpdateRequestDto {
 
   private AssetType assetType;
