@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import com.cozybinarybase.accountstopthestore.model.category.domain.Category;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveResponseDto;
+import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
+import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.constants.CategoryType;
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
@@ -15,6 +17,7 @@ import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authori
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,8 +55,8 @@ class CategoryServiceTest {
     member.setEmail("test@test.com");
     member.setPassword("1234");
     member.setName("홍길동");
-
     Member loginMember = Member.fromEntity(member);
+
     CategoryEntity savedCategory = new CategoryEntity();
     savedCategory.setId(1L);
     savedCategory.setName("월급");
@@ -84,5 +87,47 @@ class CategoryServiceTest {
     // then
     assertEquals("월급", responseDto.getCategoryName());
     assertEquals("수입", responseDto.getCategoryType());
+  }
+
+  @Test
+  void 카테고리_수정_test() throws Exception {
+    // given
+    CategoryUpdateRequestDto requestDto = new CategoryUpdateRequestDto();
+    requestDto.setCategoryName("적금");
+    requestDto.setCategoryType(CategoryType.SPENDING);
+
+    MemberEntity member = new MemberEntity();
+    member.setId(1L);
+    member.setRole(Authority.USER);
+    member.setEmail("test@test.com");
+    member.setPassword("1234");
+    member.setName("홍길동");
+    Member loginMember = Member.fromEntity(member);
+
+    CategoryEntity savedCategory = new CategoryEntity();
+    savedCategory.setId(1L);
+    savedCategory.setName("월급");
+    savedCategory.setType(CategoryType.INCOME);
+    savedCategory.setMember(member);
+
+    // stub 1
+    when(memberService.validateAndGetMember(1L, loginMember)).thenReturn(member);
+
+    // stub 2
+    when(categoryRepository.findById(any())).thenReturn(Optional.of(savedCategory));
+
+    // stub 3
+    when(categoryRepository.existsByNameAndTypeAndMember_Id(any(), any(), any())).thenReturn(false);
+
+    // stub 4
+    when(categoryRepository.save(any())).thenReturn(savedCategory);
+
+    // when
+    CategoryUpdateResponseDto responseDto =
+        categoryService.updateCategory(1L, 1L, requestDto, loginMember);
+
+    // then
+    assertEquals("적금", responseDto.getCategoryName());
+    assertEquals("지출", responseDto.getCategoryType());
   }
 }
