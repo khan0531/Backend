@@ -1,5 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.category.persist.entity;
 
+import com.cozybinarybase.accountstopthestore.model.category.dto.constants.CategoryType;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,11 +30,15 @@ public class CategoryEntity {
   @Column(name = "categoryName")
   private String name;
 
+  @Column(name = "categoryType")
+  private CategoryType type;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member")
   private MemberEntity member;
 
-  public void update(String categoryName) {
+  public void update(String categoryName, CategoryType categoryType) {
     this.name = categoryName;
+    this.type = categoryType;
   }
 }

@@ -1,20 +1,18 @@
 package com.cozybinarybase.accountstopthestore.model.category.controller;
 
-import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryDeleteResponseDto;
-import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryResponseDto;
+import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryListResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateResponseDto;
-import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.category.service.CategoryService;
-import java.util.List;
+import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import io.swagger.v3.oas.annotations.Operation;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,60 +23,56 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/categories")
+@RequestMapping("/members")
 @RestController
 public class CategoryController {
 
   private final CategoryService categoryService;
 
-  @PostMapping
+  @Operation(summary = "카테고리 추가", description = "유저가 카테고리를 추가할 때 사용되는 API")
+  @PostMapping("/{memberId}/categories")
   public ResponseEntity<?> saveCategory(
+      @PathVariable Long memberId,
       @RequestBody @Valid CategorySaveRequestDto requestDto,
-      @AuthenticationPrincipal Member member,
-      BindingResult bindingResult
+      @AuthenticationPrincipal Member member
   ) {
-    CategorySaveResponseDto responseDto = categoryService.saveCategory(requestDto, member.getId());
-    return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    CategorySaveResponseDto responseDto =
+        categoryService.saveCategory(memberId, requestDto, member);
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
   }
 
-  @PutMapping("/{categoryId}")
+  @Operation(summary = "카테고리 수정", description = "유저가 카테고리를 수정할 때 사용되는 API")
+  @PutMapping("/{memberId}/categories/{categoryId}")
   public ResponseEntity<?> updateCategory(
+      @PathVariable Long memberId,
       @PathVariable Long categoryId,
       @RequestBody @Valid CategoryUpdateRequestDto requestDto,
-      @AuthenticationPrincipal Member member,
-      BindingResult bindingResult
+      @AuthenticationPrincipal Member member
   ) {
     CategoryUpdateResponseDto responseDto =
-        categoryService.updateCategory(categoryId, requestDto, member.getId());
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        categoryService.updateCategory(memberId, categoryId, requestDto, member);
+    return ResponseEntity.ok().body(responseDto);
   }
 
-  @DeleteMapping("/{categoryId}")
+  @Operation(summary = "카테고리 삭제", description = "유저가 카테고리를 삭제할 때 사용되는 API")
+  @DeleteMapping("/{memberId}/categories/{categoryId}")
   public ResponseEntity<?> deleteCategory(
+      @PathVariable Long memberId,
       @PathVariable Long categoryId,
       @AuthenticationPrincipal Member member
   ) {
-    CategoryDeleteResponseDto responseDto =
-        categoryService.deleteCategory(categoryId, member.getId());
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    categoryService.deleteCategory(memberId, categoryId, member);
+    return ResponseEntity.ok().body("카테고리가 삭제되었습니다.");
   }
 
-  @GetMapping("/{categoryId}")
-  public ResponseEntity<?> getCategory(
-      @PathVariable Long categoryId,
-      @AuthenticationPrincipal Member member
-  ) {
-    CategoryResponseDto responseDto =
-        categoryService.getCategory(categoryId, member.getId());
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
-  }
-
-  @GetMapping
+  @Operation(summary = "카테고리 목록 조회", description = "유저가 카테고리 목록을 조회할 때 사용되는 API")
+  @GetMapping("/{memberId}/categories")
   public ResponseEntity<?> allCategory(
+      @PathVariable Long memberId,
       @AuthenticationPrincipal Member member
   ) {
-    List<CategoryResponseDto> responseDto =
-        categoryService.allCategory(member.getId());
-    return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    CategoryListResponseDto responseDto = CategoryListResponseDto.of(
+        categoryService.allCategory(memberId, member));
+    return ResponseEntity.ok().body(responseDto);
   }
 }
