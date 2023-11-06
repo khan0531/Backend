@@ -14,10 +14,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Setter
 @Getter
 @Entity(name = "category")
 public class CategoryEntity {
@@ -36,9 +38,4 @@ public class CategoryEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member")
   private MemberEntity member;
-
-  public void update(String categoryName, CategoryType categoryType) {
-    this.name = categoryName;
-    this.type = categoryType;
-  }
 }
