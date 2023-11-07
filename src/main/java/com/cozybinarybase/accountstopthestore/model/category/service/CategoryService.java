@@ -28,31 +28,32 @@ public class CategoryService {
 
   @Transactional
   public CategorySaveResponseDto saveCategory(
-      Long memberId, CategorySaveRequestDto requestDto, Member member
+      CategorySaveRequestDto requestDto, Member member
   ) {
-    memberService.validateAndGetMember(memberId, member);
+    memberService.validateAndGetMember(member);
 
-    existCategoryOfMember(requestDto.getCategoryName(), requestDto.getCategoryType(), memberId);
+    existCategoryOfMember(
+        requestDto.getCategoryName(), requestDto.getCategoryType(), member.getId());
 
     CategoryEntity categoryEntity =
-        categoryRepository.save(category.createCategory(requestDto, memberId).toEntity());
+        categoryRepository.save(category.createCategory(requestDto, member.getId()).toEntity());
     return CategorySaveResponseDto.fromEntity(categoryEntity);
   }
 
   @Transactional
   public CategoryUpdateResponseDto updateCategory(
-      Long memberId,
       Long categoryId,
       CategoryUpdateRequestDto requestDto,
       Member member
   ) {
-    memberService.validateAndGetMember(memberId, member);
+    memberService.validateAndGetMember(member);
 
     CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(
         CategoryNotValidException::new
     );
 
-    existCategoryOfMember(requestDto.getCategoryName(), requestDto.getCategoryType(), memberId);
+    existCategoryOfMember(
+        requestDto.getCategoryName(), requestDto.getCategoryType(), member.getId());
 
     Category categoryDomain = Category.fromEntity(categoryEntity);
     categoryDomain.updateCategory(requestDto);
@@ -64,8 +65,8 @@ public class CategoryService {
   }
 
   @Transactional
-  public void deleteCategory(Long memberId, Long categoryId, Member member) {
-    memberService.validateAndGetMember(memberId, member);
+  public void deleteCategory(Long categoryId, Member member) {
+    memberService.validateAndGetMember(member);
 
     CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(
         CategoryNotValidException::new
@@ -75,10 +76,10 @@ public class CategoryService {
   }
 
   @Transactional(readOnly = true)
-  public List<CategoryResponseDto> allCategory(Long memberId, Member member) {
-    memberService.validateAndGetMember(memberId, member);
+  public List<CategoryResponseDto> allCategory(Member member) {
+    memberService.validateAndGetMember(member);
 
-    List<CategoryEntity> categoryEntityList = categoryRepository.findByMember_Id(memberId);
+    List<CategoryEntity> categoryEntityList = categoryRepository.findByMember_Id(member.getId());
 
     return categoryEntityList.stream()
         .map(CategoryResponseDto::fromEntity)
