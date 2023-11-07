@@ -70,7 +70,7 @@ class CategoryServiceTest {
         .build();
 
     // stub 1
-    when(memberService.validateAndGetMember(1L, loginMember)).thenReturn(member);
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
 
     // stub 2
     when(categoryRepository.existsByNameAndTypeAndMember_Id(any(), any(), any())).thenReturn(false);
@@ -82,7 +82,7 @@ class CategoryServiceTest {
     when(categoryRepository.save(any())).thenReturn(savedCategory);
 
     // when
-    CategorySaveResponseDto responseDto = categoryService.saveCategory(1L, requestDto, loginMember);
+    CategorySaveResponseDto responseDto = categoryService.saveCategory(requestDto, loginMember);
 
     // then
     assertEquals("월급", responseDto.getCategoryName());
@@ -111,7 +111,7 @@ class CategoryServiceTest {
     savedCategory.setMember(member);
 
     // stub 1
-    when(memberService.validateAndGetMember(1L, loginMember)).thenReturn(member);
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
 
     // stub 2
     when(categoryRepository.findById(any())).thenReturn(Optional.of(savedCategory));
@@ -124,7 +124,7 @@ class CategoryServiceTest {
 
     // when
     CategoryUpdateResponseDto responseDto =
-        categoryService.updateCategory(1L, 1L, requestDto, loginMember);
+        categoryService.updateCategory(1L, requestDto, loginMember);
 
     // then
     assertEquals("적금", responseDto.getCategoryName());
@@ -153,13 +153,13 @@ class CategoryServiceTest {
     savedCategory.setMember(member);
 
     // stub 1
-    when(memberService.validateAndGetMember(1L, loginMember)).thenReturn(member);
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
 
     // stub 2
     when(categoryRepository.findById(any())).thenReturn(Optional.of(savedCategory));
 
     // when
-    categoryService.deleteCategory(1L, 1L, loginMember);
+    categoryService.deleteCategory(1L, loginMember);
 
     // then
     verify(categoryRepository).delete(savedCategory);
@@ -197,14 +197,14 @@ class CategoryServiceTest {
     categoryEntityList.add(category2);
 
     // stub 1
-    when(memberService.validateAndGetMember(1L, loginMember)).thenReturn(member);
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
 
     // stub 2
     when(categoryRepository.findByMember_Id(1L)).thenReturn(categoryEntityList);
 
     // when
     List<CategoryResponseDto> responseDtoList =
-        categoryService.allCategory(1L, Member.fromEntity(member));
+        categoryService.allCategory(Member.fromEntity(member));
 
     // then
     assertEquals(2, responseDtoList.size());
