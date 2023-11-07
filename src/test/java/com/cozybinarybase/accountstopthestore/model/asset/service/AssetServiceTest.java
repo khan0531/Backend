@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.cozybinarybase.accountstopthestore.model.asset.domain.Asset;
+import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
@@ -18,6 +19,8 @@ import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authori
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -193,5 +196,64 @@ class AssetServiceTest {
 
     // then
     verify(assetRepository).delete(savedAsset);
+  }
+
+  @Test
+  void 자산_목록_test() throws Exception {
+    // given
+    MemberEntity member = new MemberEntity();
+    member.setId(1L);
+    member.setRole(Authority.USER);
+    member.setEmail("test@test.com");
+    member.setPassword("1234");
+    member.setName("홍길동");
+    Member loginMember = Member.fromEntity(member);
+
+    List<AssetEntity> assetEntityList = new ArrayList<>();
+
+    assetEntityList.add(AssetEntity.builder()
+        .id(1L)
+        .type(AssetType.CARD)
+        .name("우리카드")
+        .amount(100000L)
+        .statementDay(10)
+        .dueDay(20)
+        .memo("메모")
+        .build());
+
+    assetEntityList.add(AssetEntity.builder()
+        .id(1L)
+        .type(AssetType.MONEY)
+        .name("적금")
+        .amount(200000L)
+        .statementDay(1)
+        .dueDay(2)
+        .memo("메모2")
+        .build());
+
+    // stub 1
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
+
+    // stub 2
+    when(assetRepository.findByMember_Id(1L)).thenReturn(assetEntityList);
+
+    // when
+    List<AssetResponseDto> responseDtoList = assetService.allAsset(loginMember);
+
+    // then
+    assertEquals(2, responseDtoList.size());
+    assertEquals("카드", responseDtoList.get(0).getAssetType());
+    assertEquals("우리카드", responseDtoList.get(0).getAssetName());
+    assertEquals(100000L, responseDtoList.get(0).getAmount());
+    assertEquals(10, responseDtoList.get(0).getStatementDay());
+    assertEquals(20, responseDtoList.get(0).getDueDay());
+    assertEquals("메모", responseDtoList.get(0).getMemo());
+
+    assertEquals("현금", responseDtoList.get(1).getAssetType());
+    assertEquals("적금", responseDtoList.get(1).getAssetName());
+    assertEquals(200000L, responseDtoList.get(1).getAmount());
+    assertEquals(1, responseDtoList.get(1).getStatementDay());
+    assertEquals(2, responseDtoList.get(1).getDueDay());
+    assertEquals("메모2", responseDtoList.get(1).getMemo());
   }
 }
