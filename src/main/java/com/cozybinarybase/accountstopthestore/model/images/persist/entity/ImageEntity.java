@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +23,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "Image")
 public class ImageEntity {
@@ -31,12 +35,15 @@ public class ImageEntity {
   private Long imageId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member")
+  @JoinColumn(name = "member", nullable = false)
   private MemberEntity member;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "accountId")
   private AccountBookEntity accountBook;
+
+  @Column(name = "imageFileName", nullable = false)
+  private String imageFileName;
 
   @Column(name = "imagePath", nullable = false)
   private String imagePath;
@@ -52,7 +59,7 @@ public class ImageEntity {
   private ImageType imageType;
 
   public enum ImageType {
-    original, compressed, thumbnail
+    ORIGINAL, COMPRESSED, THUMBNAIL
   }
 
 }
