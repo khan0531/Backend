@@ -35,7 +35,7 @@ public class ImageEntity {
   private Long imageId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member", nullable = false)
+  @JoinColumn(name = "memberId", nullable = false)
   private MemberEntity member;
 
   @ManyToOne(fetch = FetchType.LAZY)
