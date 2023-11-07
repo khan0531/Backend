@@ -1,6 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.category.controller;
 
-import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryListResponseDto;
+import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
@@ -8,6 +8,7 @@ import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateR
 import com.cozybinarybase.accountstopthestore.model.category.service.CategoryService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -71,8 +72,7 @@ public class CategoryController {
       @PathVariable Long memberId,
       @AuthenticationPrincipal Member member
   ) {
-    CategoryListResponseDto responseDto = CategoryListResponseDto.of(
-        categoryService.allCategory(memberId, member));
-    return ResponseEntity.ok().body(responseDto);
+    List<CategoryResponseDto> responseDtoList = categoryService.allCategory(memberId, member);
+    return ResponseEntity.ok().body(responseDtoList);
   }
 }
