@@ -1,20 +1,23 @@
 package com.cozybinarybase.accountstopthestore.model.category.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryDeleteResponseDto;
+import com.cozybinarybase.accountstopthestore.model.category.domain.Category;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.category.dto.constants.CategoryType;
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
+import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authority;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
-import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,157 +34,183 @@ class CategoryServiceTest {
   private CategoryService categoryService;
 
   @Mock
+  private MemberService memberService;
+
+  @Mock
   private CategoryRepository categoryRepository;
 
   @Mock
-  private MemberRepository memberRepository;
-
-  @Spy
-  private ObjectMapper objectMapper;
+  private Category categoryMock;
 
   @Test
-  void 카테고리_등록_test() throws Exception {
+  void 카테고리_생성_test() throws Exception {
     // given
-    Long memberId = 1L;
+    CategorySaveRequestDto requestDto = new CategorySaveRequestDto();
+    requestDto.setCategoryName("월급");
+    requestDto.setCategoryType(CategoryType.INCOME);
 
-    CategorySaveRequestDto categorySaveRequestDto = new CategorySaveRequestDto();
-    categorySaveRequestDto.setCategoryName("여행");
+    MemberEntity member = new MemberEntity();
+    member.setId(1L);
+    member.setRole(Authority.USER);
+    member.setEmail("test@test.com");
+    member.setPassword("1234");
+    member.setName("홍길동");
+    Member loginMember = Member.fromEntity(member);
+
+    CategoryEntity savedCategory = new CategoryEntity();
+    savedCategory.setId(1L);
+    savedCategory.setName("월급");
+    savedCategory.setType(CategoryType.INCOME);
+    savedCategory.setMember(member);
+
+    Category categoryDomain = Category.builder()
+        .name(requestDto.getCategoryName())
+        .type(requestDto.getCategoryType())
+        .memberId(1L)
+        .build();
 
     // stub 1
-    MemberEntity hong = new MemberEntity();
-    hong.setId(1L);
-    hong.setName("홍길동");
-    hong.setEmail("test@test.com");
-    when(memberRepository.findById(any())).thenReturn(Optional.of(hong));
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
 
     // stub 2
-    CategoryEntity categoryEntity = new CategoryEntity(1L, "여행", hong);
-    when(categoryRepository.save(any())).thenReturn(categoryEntity);
+    when(categoryRepository.existsByNameAndTypeAndMember_Id(any(), any(), any())).thenReturn(false);
+
+    // stub 3
+    when(categoryMock.createCategory(requestDto, 1L)).thenReturn(categoryDomain);
+
+    // stub 4
+    when(categoryRepository.save(any())).thenReturn(savedCategory);
 
     // when
-    CategorySaveResponseDto categorySaveResponseDto = categoryService.saveCategory(
-        categorySaveRequestDto, memberId);
-
-    String responseBody = objectMapper.writeValueAsString(categorySaveResponseDto);
-    System.out.println("테스트: " + responseBody);
+    CategorySaveResponseDto responseDto = categoryService.saveCategory(requestDto, loginMember);
 
     // then
-    assertThat(categorySaveResponseDto.getId()).isEqualTo(1L);
+    assertEquals("월급", responseDto.getCategoryName());
+    assertEquals("수입", responseDto.getCategoryType());
   }
 
   @Test
   void 카테고리_수정_test() throws Exception {
     // given
-    Long memberId = 1L;
+    CategoryUpdateRequestDto requestDto = new CategoryUpdateRequestDto();
+    requestDto.setCategoryName("적금");
+    requestDto.setCategoryType(CategoryType.SPENDING);
 
-    CategoryUpdateRequestDto categoryUpdateRequestDto = new CategoryUpdateRequestDto();
-    categoryUpdateRequestDto.setCategoryName("쇼핑");
+    MemberEntity member = new MemberEntity();
+    member.setId(1L);
+    member.setRole(Authority.USER);
+    member.setEmail("test@test.com");
+    member.setPassword("1234");
+    member.setName("홍길동");
+    Member loginMember = Member.fromEntity(member);
+
+    CategoryEntity savedCategory = new CategoryEntity();
+    savedCategory.setId(1L);
+    savedCategory.setName("월급");
+    savedCategory.setType(CategoryType.INCOME);
+    savedCategory.setMember(member);
 
     // stub 1
-    MemberEntity hong = new MemberEntity();
-    hong.setId(1L);
-    hong.setName("홍길동");
-    hong.setEmail("test@test.com");
-    when(memberRepository.findById(any())).thenReturn(Optional.of(hong));
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
 
     // stub 2
-    CategoryEntity existingCategory = new CategoryEntity(1L, "여행", hong);
-    when(categoryRepository.findById(any())).thenReturn(Optional.of(existingCategory));
+    when(categoryRepository.findById(any())).thenReturn(Optional.of(savedCategory));
+
+    // stub 3
+    when(categoryRepository.existsByNameAndTypeAndMember_Id(any(), any(), any())).thenReturn(false);
+
+    // stub 4
+    when(categoryRepository.save(any())).thenReturn(savedCategory);
 
     // when
-    CategoryUpdateResponseDto categoryUpdateResponseDto =
-        categoryService.updateCategory(1L, categoryUpdateRequestDto, memberId);
-
-    String responseBody = objectMapper.writeValueAsString(categoryUpdateResponseDto);
-    System.out.println("테스트: " + responseBody);
+    CategoryUpdateResponseDto responseDto =
+        categoryService.updateCategory(1L, requestDto, loginMember);
 
     // then
-    assertThat(categoryUpdateResponseDto.getCategoryName()).isEqualTo("쇼핑");
+    assertEquals("적금", responseDto.getCategoryName());
+    assertEquals("지출", responseDto.getCategoryType());
   }
 
   @Test
   void 카테고리_삭제_test() throws Exception {
     // given
-    Long memberId = 1L;
+    CategoryUpdateRequestDto requestDto = new CategoryUpdateRequestDto();
+    requestDto.setCategoryName("적금");
+    requestDto.setCategoryType(CategoryType.SPENDING);
+
+    MemberEntity member = new MemberEntity();
+    member.setId(1L);
+    member.setRole(Authority.USER);
+    member.setEmail("test@test.com");
+    member.setPassword("1234");
+    member.setName("홍길동");
+    Member loginMember = Member.fromEntity(member);
+
+    CategoryEntity savedCategory = new CategoryEntity();
+    savedCategory.setId(1L);
+    savedCategory.setName("월급");
+    savedCategory.setType(CategoryType.INCOME);
+    savedCategory.setMember(member);
 
     // stub 1
-    MemberEntity hong = new MemberEntity();
-    hong.setId(1L);
-    hong.setName("홍길동");
-    hong.setEmail("test@test.com");
-    when(memberRepository.findById(any())).thenReturn(Optional.of(hong));
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
 
     // stub 2
-    CategoryEntity existingCategory = new CategoryEntity(1L, "여행", hong);
-    when(categoryRepository.findById(any())).thenReturn(Optional.of(existingCategory));
+    when(categoryRepository.findById(any())).thenReturn(Optional.of(savedCategory));
 
     // when
-    CategoryDeleteResponseDto categoryDeleteResponseDto =
-        categoryService.deleteCategory(1L, memberId);
-
-    String responseBody = objectMapper.writeValueAsString(categoryDeleteResponseDto);
-    System.out.println("테스트: " + responseBody);
+    categoryService.deleteCategory(1L, loginMember);
 
     // then
-    assertThat(categoryDeleteResponseDto.getCategoryId()).isEqualTo(1L);
+    verify(categoryRepository).delete(savedCategory);
   }
 
   @Test
-  void 카테고리_상세_조회_test() throws Exception {
+  void 카테고리_목록_test() throws Exception {
     // given
-    Long memberId = 1L;
+    CategoryUpdateRequestDto requestDto = new CategoryUpdateRequestDto();
+    requestDto.setCategoryName("적금");
+    requestDto.setCategoryType(CategoryType.SPENDING);
 
-    // stub 1
-    MemberEntity hong = new MemberEntity();
-    hong.setId(1L);
-    hong.setName("홍길동");
-    hong.setEmail("test@test.com");
-    when(memberRepository.findById(any())).thenReturn(Optional.of(hong));
-
-    // stub 2
-    CategoryEntity existingCategory = new CategoryEntity(1L, "여행", hong);
-    when(categoryRepository.findById(any())).thenReturn(Optional.of(existingCategory));
-
-    // when
-    CategoryResponseDto categoryResponseDto =
-        categoryService.getCategory(1L, memberId);
-
-    String responseBody = objectMapper.writeValueAsString(categoryResponseDto);
-    System.out.println("테스트: " + responseBody);
-
-    // then
-    assertThat(categoryResponseDto.getCategoryName()).isEqualTo("여행");
-    assertThat(categoryResponseDto.getCategoryOwnerId()).isEqualTo(1L);
-  }
-
-  @Test
-  void 카테고리_리스트_조회_test() throws Exception {
-    // given
-    MemberEntity hong = new MemberEntity();
-    hong.setId(1L);
-    hong.setName("홍길동");
-    hong.setEmail("test@test.com");
-
-    CategoryEntity categoryEntity1 = new CategoryEntity(1L, "여행", hong);
-    CategoryEntity categoryEntity2 = new CategoryEntity(2L, "쇼핑", hong);
+    MemberEntity member = new MemberEntity();
+    member.setId(1L);
+    member.setRole(Authority.USER);
+    member.setEmail("test@test.com");
+    member.setPassword("1234");
+    member.setName("홍길동");
+    Member loginMember = Member.fromEntity(member);
 
     List<CategoryEntity> categoryEntityList = new ArrayList<>();
-    categoryEntityList.add(categoryEntity1);
-    categoryEntityList.add(categoryEntity2);
+
+    CategoryEntity category1 = new CategoryEntity();
+    category1.setId(1L);
+    category1.setName("월급");
+    category1.setType(CategoryType.INCOME);
+    category1.setMember(member);
+    categoryEntityList.add(category1);
+
+    CategoryEntity category2 = new CategoryEntity();
+    category2.setId(2L);
+    category2.setName("적금");
+    category2.setType(CategoryType.SPENDING);
+    category2.setMember(member);
+    categoryEntityList.add(category2);
 
     // stub 1
-    when(memberRepository.findById(any())).thenReturn(Optional.of(hong));
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
 
     // stub 2
-    when(categoryRepository.findByMember_Id(any())).thenReturn(categoryEntityList);
+    when(categoryRepository.findByMember_Id(1L)).thenReturn(categoryEntityList);
 
     // when
-    List<CategoryResponseDto> categoryResponseDtoList = categoryService.allCategory(1L);
-
-    String responseBody = objectMapper.writeValueAsString(categoryResponseDtoList);
-    System.out.println("테스트: " + responseBody);
+    List<CategoryResponseDto> responseDtoList =
+        categoryService.allCategory(Member.fromEntity(member));
 
     // then
-    assertThat(categoryResponseDtoList.size()).isEqualTo(2);
+    assertEquals(2, responseDtoList.size());
+    assertEquals("월급", responseDtoList.get(0).getCategoryName());
+    assertEquals("수입", responseDtoList.get(0).getCategoryType());
+    assertEquals("적금", responseDtoList.get(1).getCategoryName());
+    assertEquals("지출", responseDtoList.get(1).getCategoryType());
   }
 }

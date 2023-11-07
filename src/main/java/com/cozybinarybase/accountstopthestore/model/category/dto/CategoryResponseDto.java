@@ -12,15 +12,15 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CategoryResponseDto {
 
-  private Long id;
+  private Long categoryId;
+  private String categoryType;
   private String categoryName;
-  private Long categoryOwnerId;
 
   public static CategoryResponseDto fromEntity(CategoryEntity categoryEntity) {
     return CategoryResponseDto.builder()
-        .id(categoryEntity.getId())
+        .categoryId(categoryEntity.getId())
+        .categoryType(categoryEntity.getType().getValue())
         .categoryName(categoryEntity.getName())
-        .categoryOwnerId(categoryEntity.getMember().getId())
         .build();
   }
 }
