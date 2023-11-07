@@ -74,7 +74,13 @@ public class MemberService implements UserDetailsService {
     }
 
     return memberRepository.findById(memberId).orElseThrow(
-        () -> new MemberNotValidException()
+        MemberNotValidException::new
+    );
+  }
+
+  public MemberEntity validateAndGetMember(Member member) {
+    return memberRepository.findById(member.getId()).orElseThrow(
+        MemberNotValidException::new
     );
   }
 }
