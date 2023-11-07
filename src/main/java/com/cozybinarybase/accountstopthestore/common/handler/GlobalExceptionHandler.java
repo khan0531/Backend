@@ -1,7 +1,7 @@
 package com.cozybinarybase.accountstopthestore.common.handler;
 
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
-import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotValidException;
+import com.cozybinarybase.accountstopthestore.model.asset.exception.AssetNotValidException;
 import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotValidException;
 import java.util.HashMap;
 import java.util.Map;
