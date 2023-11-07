@@ -4,13 +4,17 @@ spring:
       ddl-auto: create-drop
     show-sql: true
   datasource:
-    url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-    h2:
-      console:
-        enabled: true
+#    url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+#    username: sa
+#    password:
+#    driver-class-name: org.h2.Driver
+#    h2:
+#      console:
+#        enabled: true
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/demo
+    username: root
+    password: 7845120qwe
+    driver-class-name: com.mysql.cj.jdbc.Driver
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

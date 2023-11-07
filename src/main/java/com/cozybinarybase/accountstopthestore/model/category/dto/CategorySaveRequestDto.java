@@ -1,6 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.category.dto;
 
 import com.cozybinarybase.accountstopthestore.model.category.dto.constants.CategoryType;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Getter
 public class CategorySaveRequestDto {
 
-  @NotNull(message = "카테고리명을 입력해주세요.")
+  @NotBlank(message = "카테고리명을 입력해주세요.")
   private String categoryName;
 
   @NotNull(message = "카테고리 유형을 입력해주세요.")

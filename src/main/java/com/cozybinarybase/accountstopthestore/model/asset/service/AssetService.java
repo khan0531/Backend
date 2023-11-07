@@ -9,7 +9,7 @@ import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetSearchTypeRes
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.AssetUpdateResponseDto;
 import com.cozybinarybase.accountstopthestore.model.asset.dto.constants.AssetType;
-import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotFoundException;
+import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotValidException;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import com.cozybinarybase.accountstopthestore.model.asset.domain.Asset;
@@ -49,7 +49,7 @@ public class AssetService {
     memberService.validateAndGetMember(memberId, member);
 
     AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
-        AssetNotFoundException::new
+        AssetNotValidException::new
     );
 
     Asset assetDomain = Asset.fromEntity(assetEntity);
@@ -66,7 +66,7 @@ public class AssetService {
     memberService.validateAndGetMember(memberId, member);
 
     AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
-        AssetNotFoundException::new
+        AssetNotValidException::new
     );
 
     assetRepository.delete(assetEntity);
@@ -81,7 +81,7 @@ public class AssetService {
     memberService.validateAndGetMember(memberId, member);
 
     AssetEntity assetEntity = assetRepository.findById(assetId).orElseThrow(
-        AssetNotFoundException::new
+        AssetNotValidException::new
     );
 
     return AssetResponseDto.fromEntity(assetEntity);

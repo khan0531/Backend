@@ -1,8 +1,8 @@
 package com.cozybinarybase.accountstopthestore.common.handler;
 
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
-import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotFoundException;
-import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotFoundException;
+import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotValidException;
+import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotValidException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,27 +30,27 @@ public class GlobalExceptionHandler {
         .body(errorDetails);
   }
 
-  @ExceptionHandler(AssetNotFoundException.class)
-  public ResponseEntity<?> assetNotFoundException(AssetNotFoundException e) {
+  @ExceptionHandler(AssetNotValidException.class)
+  public ResponseEntity<?> handleAssetNotValidException(AssetNotValidException e) {
     log.error(e.getMessage());
 
     Map<String, String> errorDetails = new HashMap<>();
     errorDetails.put("message", e.getMessage());
 
     return ResponseEntity
-        .status(HttpStatus.NO_CONTENT)
+        .status(HttpStatus.BAD_REQUEST)
         .body(errorDetails);
   }
 
-  @ExceptionHandler(CategoryNotFoundException.class)
-  public ResponseEntity<?> handleCategoryNotFoundException(CategoryNotFoundException e) {
+  @ExceptionHandler(CategoryNotValidException.class)
+  public ResponseEntity<?> handleCategoryNotValidException(CategoryNotValidException e) {
     log.error(e.getMessage());
 
     Map<String, String> errorDetails = new HashMap<>();
     errorDetails.put("message", e.getMessage());
 
     return ResponseEntity
-        .status(HttpStatus.NO_CONTENT)
+        .status(HttpStatus.BAD_REQUEST)
         .body(errorDetails);
   }
 

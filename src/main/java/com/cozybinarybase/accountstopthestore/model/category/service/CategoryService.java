@@ -7,7 +7,7 @@ import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRes
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.constants.CategoryType;
-import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotFoundException;
+import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotValidException;
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
@@ -49,7 +49,7 @@ public class CategoryService {
     memberService.validateAndGetMember(memberId, member);
 
     CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(
-        CategoryNotFoundException::new
+        CategoryNotValidException::new
     );
 
     existCategoryOfMember(requestDto.getCategoryName(), requestDto.getCategoryType(), memberId);
@@ -68,7 +68,7 @@ public class CategoryService {
     memberService.validateAndGetMember(memberId, member);
 
     CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(
-        CategoryNotFoundException::new
+        CategoryNotValidException::new
     );
 
     categoryRepository.delete(categoryEntity);
@@ -90,7 +90,7 @@ public class CategoryService {
     if (categoryRepository.existsByNameAndTypeAndMember_Id(
         categoryName, categoryType, memberId)
     ) {
-      throw new CategoryNotFoundException("이미 존재하는 카테고리입니다.");
+      throw new CategoryNotValidException("이미 존재하는 카테고리입니다.");
     }
   }
 }
