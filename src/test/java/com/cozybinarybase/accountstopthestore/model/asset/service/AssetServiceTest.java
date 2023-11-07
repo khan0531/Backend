@@ -2,6 +2,7 @@ package com.cozybinarybase.accountstopthestore.model.asset.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.cozybinarybase.accountstopthestore.model.asset.domain.Asset;
@@ -157,5 +158,40 @@ class AssetServiceTest {
     assertEquals("메모 수정", requestDto.getMemo());
     assertEquals("2023-11-07T11:00", responseDto.getCreatedAt().toString());
     assertEquals("2023-11-07T12:00", responseDto.getUpdatedAt().toString());
+  }
+
+  @Test
+  void 자산_삭제_test() throws Exception {
+    // given
+    MemberEntity member = new MemberEntity();
+    member.setId(1L);
+    member.setRole(Authority.USER);
+    member.setEmail("test@test.com");
+    member.setPassword("1234");
+    member.setName("홍길동");
+    Member loginMember = Member.fromEntity(member);
+
+    AssetEntity savedAsset = AssetEntity.builder()
+        .id(1L)
+        .type(AssetType.MONEY)
+        .name("월급")
+        .amount(200000L)
+        .statementDay(1)
+        .dueDay(2)
+        .memo("메모")
+        .member(member)
+        .build();
+
+    // stub 1
+    when(memberService.validateAndGetMember(loginMember)).thenReturn(member);
+
+    // stub 2
+    when(assetRepository.findById(any())).thenReturn(Optional.of(savedAsset));
+
+    // when
+    assetService.deleteAsset(1L, loginMember);
+
+    // then
+    verify(assetRepository).delete(savedAsset);
   }
 }
