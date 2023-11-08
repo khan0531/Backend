@@ -1,14 +1,18 @@
 package com.cozybinarybase.accountstopthestore.model.accountbook.controller;
 
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookImageResponseDto;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.TransactionType;
 import com.cozybinarybase.accountstopthestore.model.accountbook.service.AccountBookService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -54,6 +59,21 @@ public class AccountBookController {
       @AuthenticationPrincipal Member member) {
     accountBookService.deleteAccountBook(accountId, member);
     return ResponseEntity.ok().body("가계 내역이 삭제되었습니다.");
+  }
+
+  @GetMapping
+  public ResponseEntity<?> getAccountBooks(
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+      @RequestParam TransactionType transactionType,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int limit,
+      @AuthenticationPrincipal Member member) {
+    List<AccountBookResponseDto> accountBookResponseDtoList =
+        accountBookService.getAccountBooks(startDate, endDate, transactionType, page, limit,
+            member);
+
+    return ResponseEntity.ok().body(accountBookResponseDtoList);
   }
 
   @GetMapping("/{accountId}/images")

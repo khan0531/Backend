@@ -2,10 +2,12 @@ package com.cozybinarybase.accountstopthestore.model.accountbook.service;
 
 import com.cozybinarybase.accountstopthestore.model.accountbook.domain.AccountBook;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookImageResponseDto;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.TransactionType;
 import com.cozybinarybase.accountstopthestore.model.accountbook.exception.AccountBookNotValidException;
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.entity.AccountBookEntity;
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.repository.AccountBookRepository;
@@ -17,10 +19,14 @@ import com.cozybinarybase.accountstopthestore.model.category.persist.entity.Cate
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +39,7 @@ public class AccountBookService {
   private final AssetRepository assetRepository;
   private final MemberService memberService;
   private final AccountBook accountBook;
+  private final MemberRepository memberRepository;
 
   @Transactional
   public AccountBookSaveResponseDto saveAccountBook(
@@ -89,6 +96,30 @@ public class AccountBookService {
         .orElseThrow(AccountBookNotValidException::new);
 
     accountBookRepository.delete(accountBookEntity);
+  }
+
+  @Transactional(readOnly = true)
+  public List<AccountBookResponseDto> getAccountBooks(LocalDate startDate, LocalDate endDate,
+      TransactionType transactionType, int page, int limit, Member member) {
+    memberService.validateAndGetMember(member);
+
+    if (startDate.isAfter(endDate) || endDate.isBefore(startDate)) {
+      throw new AccountBookNotValidException("날짜 설정을 다시 해주시길 바랍니다.");
+    }
+
+    Pageable pageable = PageRequest.of(page, limit);
+
+    List<AccountBookEntity> accountBookEntityList =
+        accountBookRepository.findByCreatedAtBetweenAndTransactionTypeAndMember_Id(
+            startDate.atStartOfDay(),
+            endDate.atStartOfDay(),
+            transactionType,
+            member.getId(),
+            pageable).getContent();
+
+    return accountBookEntityList.stream()
+        .map(AccountBookResponseDto::fromEntity)
+        .collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
