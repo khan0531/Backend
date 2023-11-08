@@ -7,6 +7,7 @@ import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookS
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.AccountBookCategoryResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.TransactionType;
 import com.cozybinarybase.accountstopthestore.model.accountbook.exception.AccountBookNotValidException;
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.entity.AccountBookEntity;
@@ -19,12 +20,12 @@ import com.cozybinarybase.accountstopthestore.model.category.persist.entity.Cate
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
-import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,6 @@ public class AccountBookService {
   private final AssetRepository assetRepository;
   private final MemberService memberService;
   private final AccountBook accountBook;
-  private final MemberRepository memberRepository;
 
   @Transactional
   public AccountBookSaveResponseDto saveAccountBook(
@@ -120,6 +120,23 @@ public class AccountBookService {
     return accountBookEntityList.stream()
         .map(AccountBookResponseDto::fromEntity)
         .collect(Collectors.toList());
+  }
+
+  @Transactional(readOnly = true)
+  public AccountBookCategoryResponseDto getCategoryNamesByKeyword(String query, int limit,
+      Member member) {
+    memberService.validateAndGetMember(member);
+
+    Pageable pageable = PageRequest.of(0, limit);
+    Page<AccountBookEntity> accountBookEntities =
+        accountBookRepository.findByMember_IdAndCategory_NameStartingWithIgnoreCase(
+            member.getId(), query, pageable);
+
+    List<String> categories = accountBookEntities.stream()
+        .map(e -> e.getCategory().getName())
+        .collect(Collectors.toList());
+
+    return AccountBookCategoryResponseDto.of(categories);
   }
 
   @Transactional(readOnly = true)

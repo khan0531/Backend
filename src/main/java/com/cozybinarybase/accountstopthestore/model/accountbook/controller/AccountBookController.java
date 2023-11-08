@@ -6,6 +6,7 @@ import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookS
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.AccountBookCategoryResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.TransactionType;
 import com.cozybinarybase.accountstopthestore.model.accountbook.service.AccountBookService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
@@ -74,6 +75,17 @@ public class AccountBookController {
             member);
 
     return ResponseEntity.ok().body(accountBookResponseDtoList);
+  }
+
+  @GetMapping("/autocomplete")
+  public ResponseEntity<?> autocomplete(
+      @RequestParam String query,
+      @RequestParam(defaultValue = "5") int limit,
+      @AuthenticationPrincipal Member member) {
+    AccountBookCategoryResponseDto names = accountBookService.getCategoryNamesByKeyword(
+        query, limit, member);
+
+    return ResponseEntity.ok().body(names);
   }
 
   @GetMapping("/{accountId}/images")
