@@ -75,4 +75,15 @@ public class AccountBookService {
 
     return AccountBookUpdateResponseDto.fromEntity(updateAccountBookEntity);
   }
+
+  @Transactional
+  public void deleteAccountBook(Long accountId, Member member) {
+    memberService.validateAndGetMember(member);
+
+    AccountBookEntity accountBookEntity = accountBookRepository.findByIdAndMember_Id(accountId,
+            member.getId())
+        .orElseThrow(AccountBookNotValidException::new);
+
+    accountBookRepository.delete(accountBookEntity);
+  }
 }
