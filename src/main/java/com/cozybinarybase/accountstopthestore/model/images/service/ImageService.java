@@ -75,7 +75,7 @@ public class ImageService {
     String compressedFileName = "comp-" + uuid + "." + "jpg";
     Path compressedFilePath = imageUtil.storeFile(file.getBytes(),
         imagesDirectory.resolve("compresses").resolve(compressedFileName));
-    // MIME 타입은 항상 JPEG으로 설정
+    // 원본 이미지의 id를 참조
     storedImages.add(
         saveImageEntity(compressedFilePath, compressedFileName, ImageType.COMPRESSED, "image/jpeg",
             member, storedImages.get(0)));
@@ -86,13 +86,14 @@ public class ImageService {
     String thumbnailFileName = "thumb-" + uuid + "." + "jpg";
     Path thumbnailFilePath = imageUtil.storeFile(file.getBytes(),
         imagesDirectory.resolve("thumbnails").resolve(thumbnailFileName));
-    // MIME 타입은 항상 JPEG으로 설정
+    // 원본 이미지의 id를 참조
     storedImages.add(
         saveImageEntity(thumbnailFilePath, thumbnailFileName, ImageType.THUMBNAIL, "image/jpeg",
             member, storedImages.get(0)));
 
     // OCR 수행 로직(미구현)
 
+    // 원본 이미지의 id를 반환
     return ImageUploadResponseDto.builder()
         .imageId(storedImages.get(0).getImageId())
         .build();
