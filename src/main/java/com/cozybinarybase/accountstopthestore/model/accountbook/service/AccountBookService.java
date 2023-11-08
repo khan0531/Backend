@@ -1,6 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.accountbook.service;
 
 import com.cozybinarybase.accountstopthestore.model.accountbook.domain.AccountBook;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookImageResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateRequestDto;
@@ -14,8 +15,11 @@ import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.Ass
 import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotValidException;
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
+import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,5 +89,20 @@ public class AccountBookService {
         .orElseThrow(AccountBookNotValidException::new);
 
     accountBookRepository.delete(accountBookEntity);
+  }
+
+  @Transactional(readOnly = true)
+  public List<AccountBookImageResponseDto> getAccountBookImages(Long accountId, Member member) {
+    memberService.validateAndGetMember(member);
+
+    AccountBookEntity accountBookEntity = accountBookRepository.findByIdAndMember_Id(accountId,
+            member.getId())
+        .orElseThrow(AccountBookNotValidException::new);
+
+    List<ImageEntity> images = accountBookEntity.getImages();
+
+    return images.stream()
+        .map(AccountBookImageResponseDto::of)
+        .collect(Collectors.toList());
   }
 }
