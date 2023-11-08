@@ -1,4 +1,4 @@
-package com.cozybinarybase.accountstopthestore.model.asset.handler.exception;
+package com.cozybinarybase.accountstopthestore.model.asset.exception;
 
 public class AssetNotValidException extends RuntimeException {
 
