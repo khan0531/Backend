@@ -26,13 +26,18 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Image")
+@Table(name = "account_image")
 public class ImageEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "imageId", nullable = false, updatable = false)
   private Long imageId;
+
+  // 압축된 이미지와 썸네일이 원본 이미지를 참조하는 필드
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "originalImageId")
+  private ImageEntity originalImage;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "memberId", nullable = false)
@@ -55,7 +60,7 @@ public class ImageEntity {
   private LocalDateTime uploadedAt;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "imageType", columnDefinition = "ENUM('original', 'compressed', 'thumbnail')", nullable = false)
+  @Column(name = "imageType", columnDefinition = "ENUM('ORIGINAL', 'COMPRESSED', 'THUMBNAIL')", nullable = false)
   private ImageType imageType;
 
   public enum ImageType {
