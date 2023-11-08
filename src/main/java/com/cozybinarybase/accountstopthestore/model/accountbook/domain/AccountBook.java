@@ -1,6 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.accountbook.domain;
 
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveRequestDto;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.TransactionType;
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.entity.AccountBookEntity;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEntity;
@@ -51,6 +52,33 @@ public class AccountBook {
         .categoryName(categoryName)
         .assetName(assetName)
         .build();
+  }
+
+  public void updateAccountBook(AccountBookUpdateRequestDto requestDto) {
+    if (requestDto.getCategoryName() != null) {
+      this.categoryName = requestDto.getCategoryName();
+    }
+    if (requestDto.getAssetType() != null) {
+      this.assetName = requestDto.getAssetType();
+    }
+    if (requestDto.getAmount() != null) {
+      this.amount = requestDto.getAmount();
+    }
+    if (requestDto.getTransactionType() != null) {
+      this.transactionType = requestDto.getTransactionType();
+    }
+    if (requestDto.getTransactionDetail() != null) {
+      this.transactionDetail = requestDto.getTransactionDetail();
+    }
+    if (requestDto.getTransactedAt() != null) {
+      this.transactedAt = requestDto.getTransactedAt();
+    }
+    if (requestDto.getMemo() != null) {
+      this.memo = requestDto.getMemo();
+    }
+    if (requestDto.getIsInstallment() != null) {
+      this.isInstallment = requestDto.getIsInstallment();
+    }
   }
 
   public AccountBookEntity toEntity() {

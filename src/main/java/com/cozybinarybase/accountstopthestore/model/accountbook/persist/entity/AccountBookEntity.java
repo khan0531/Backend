@@ -88,6 +88,6 @@ public class AccountBookEntity {
   @JoinColumn(name = "assetId")
   private AssetEntity asset;
 
-  @OneToMany(mappedBy = "accountBook", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "accountBook", cascade = CascadeType.ALL)
   private List<ImageEntity> images;
 }

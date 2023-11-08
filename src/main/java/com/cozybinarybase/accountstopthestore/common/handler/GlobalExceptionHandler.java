@@ -1,6 +1,7 @@
 package com.cozybinarybase.accountstopthestore.common.handler;
 
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
+import com.cozybinarybase.accountstopthestore.model.accountbook.exception.AccountBookNotValidException;
 import com.cozybinarybase.accountstopthestore.model.asset.exception.AssetNotValidException;
 import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotValidException;
 import java.util.HashMap;
@@ -44,6 +45,18 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(CategoryNotValidException.class)
   public ResponseEntity<?> handleCategoryNotValidException(CategoryNotValidException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
+
+  @ExceptionHandler(AccountBookNotValidException.class)
+  public ResponseEntity<?> handleCategoryNotValidException(AccountBookNotValidException e) {
     log.error(e.getMessage());
 
     Map<String, String> errorDetails = new HashMap<>();
