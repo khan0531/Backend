@@ -35,3 +35,8 @@ jwt:
     expiration: 3600000
   refresh:
     expiration: 1209600000
+
+azure:
+  ocr:
+    endpoint: ${AZURE_OCR_ENDPOINT:azure_ocr_endpoint}
+    key: ${AZURE_OCR_KEY:azure_ocr_key}
