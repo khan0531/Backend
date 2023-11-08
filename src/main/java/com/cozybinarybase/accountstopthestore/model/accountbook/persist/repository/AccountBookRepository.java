@@ -18,4 +18,9 @@ public interface AccountBookRepository extends JpaRepository<AccountBookEntity, 
 
   Page<AccountBookEntity> findByMember_IdAndCategory_NameStartingWithIgnoreCase(
       Long memberId, String keyword, Pageable pageable);
+
+  Page<AccountBookEntity> findByMemoContainingAndTransactedAtBetweenAndCategory_NameAndAmountBetweenAndMember_Id(
+      String keyword, LocalDateTime startDate, LocalDateTime endDate, String categoryName,
+      Long minPrice, Long maxPrice, Long memberId, Pageable pageable
+  );
 }

@@ -88,6 +88,23 @@ public class AccountBookController {
     return ResponseEntity.ok().body(names);
   }
 
+  @GetMapping("/search")
+  public ResponseEntity<?> search(
+      @RequestParam String keyword,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+      @RequestParam String categoryName,
+      @RequestParam Long minPrice,
+      @RequestParam Long maxPrice,
+      @RequestParam(defaultValue = "0", required = false) int page,
+      @RequestParam(defaultValue = "10", required = false) int limit,
+      @AuthenticationPrincipal Member member) {
+    List<AccountBookResponseDto> responseDtos = accountBookService.search(
+        keyword, startDate, endDate, categoryName, minPrice, maxPrice, page, limit, member);
+
+    return ResponseEntity.ok().body(responseDtos);
+  }
+
   @GetMapping("/{accountId}/images")
   public ResponseEntity<?> getAccountBookImages(
       @PathVariable Long accountId,

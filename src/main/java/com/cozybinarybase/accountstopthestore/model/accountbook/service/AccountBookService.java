@@ -140,6 +140,27 @@ public class AccountBookService {
   }
 
   @Transactional(readOnly = true)
+  public List<AccountBookResponseDto> search(String keyword, LocalDate startDate, LocalDate endDate,
+      String categoryName,
+      Long minPrice, Long maxPrice, int page, int limit, Member member) {
+
+    if (startDate.isAfter(endDate) || endDate.isBefore(startDate)) {
+      throw new AccountBookNotValidException("날짜 설정을 다시 해주시길 바랍니다.");
+    }
+
+    Pageable pageable = PageRequest.of(page, limit);
+
+    List<AccountBookEntity> accountBookEntityList =
+        accountBookRepository.findByMemoContainingAndTransactedAtBetweenAndCategory_NameAndAmountBetweenAndMember_Id(
+            keyword, startDate.atStartOfDay(), endDate.atStartOfDay(), categoryName, minPrice,
+            maxPrice, member.getId(), pageable).getContent();
+
+    return accountBookEntityList.stream()
+        .map(AccountBookResponseDto::fromEntity)
+        .collect(Collectors.toList());
+  }
+
+  @Transactional(readOnly = true)
   public List<AccountBookImageResponseDto> getAccountBookImages(Long accountId, Member member) {
     memberService.validateAndGetMember(member);
 
