@@ -24,7 +24,7 @@ public class ImageController {
   private final ImageService imageService;
   private final ObjectMapper objectMapper;
 
-  @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<String> handleFileUpload(
       @RequestPart("image-file") MultipartFile file,
       @RequestPart("json-data") String jsonData,
