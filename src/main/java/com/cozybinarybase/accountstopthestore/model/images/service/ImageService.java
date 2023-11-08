@@ -111,11 +111,13 @@ public class ImageService {
         .build());
   }
 
-  public Resource loadImageAsResource(String imageFileName) {
-    String imagePath = imageRepository.findByImageFileName(imageFileName)
-        .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."))
-        .getImagePath();
+  public Resource loadImageAsResource(String imageFileName, Member member) {
+    ImageEntity image = imageRepository.findByImageFileName(imageFileName)
+        .orElseThrow(() -> new RuntimeException("이미지를 찾을 수 없습니다."));
 
+    memberService.validateAndGetMember(image.getMember().getId(), member);
+
+    String imagePath = image.getImagePath();
     Resource resource = new FileSystemResource(imagePath);
     if (resource.exists() || resource.isReadable()) {
       return resource;

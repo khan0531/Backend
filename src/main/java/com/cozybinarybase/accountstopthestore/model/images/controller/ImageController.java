@@ -27,7 +27,7 @@ public class ImageController {
   private final ObjectMapper objectMapper;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ImageUploadResponseDto> handleFileUpload(
+  public ResponseEntity<ImageUploadResponseDto> imageUpload(
       @RequestPart("image-file") MultipartFile file,
       @RequestPart("json-data") String jsonData,
       @AuthenticationPrincipal Member member
@@ -46,7 +46,7 @@ public class ImageController {
   public ResponseEntity<Resource> getImage(@PathVariable String imageFileName,
       @AuthenticationPrincipal Member member) {
 
-      Resource resource = imageService.loadImageAsResource(imageFileName);
+      Resource resource = imageService.loadImageAsResource(imageFileName, member);
       String contentType = "image/jpeg";
 
       return ResponseEntity.ok()
