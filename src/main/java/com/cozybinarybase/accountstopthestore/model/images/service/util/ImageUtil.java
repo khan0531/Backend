@@ -26,9 +26,6 @@ public class ImageUtil {
   public byte[] compressImage(byte[] imageData) throws IOException {
     ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
     BufferedImage image = ImageIO.read(bais);
-    if (image == null) {
-      throw new IOException("이미지 데이터가 아닙니다.");
-    }
 
     // RGB 컬러 모델로 이미지 변환
     BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -60,9 +57,6 @@ public class ImageUtil {
   public byte[] createThumbnail(byte[] imageData, int width, int height) throws IOException {
     ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
     BufferedImage image = ImageIO.read(bais);
-    if (image == null) {
-      throw new IOException("이미지 데이터가 아닙니다.");
-    }
 
     // 원본 이미지 비율 계산
     double ratio = (double) image.getWidth() / image.getHeight();
