@@ -61,8 +61,6 @@ public class ImageService {
       throw new FileIsNotValidImageException();
     }
 
-    List<ImageEntity> storedImages = new ArrayList<>();
-
     // 파일 확장자 추출
     String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
@@ -73,8 +71,8 @@ public class ImageService {
     String originalFileName = uuid + "." + extension;
     Path originalFilePath = imageUtil.storeFile(file.getBytes(),
         imagesDirectory.resolve("originals").resolve(originalFileName));
-    storedImages.add(saveImageEntity(originalFilePath, originalFileName, ImageType.ORIGINAL,
-        "image/" + extension, member, null));
+    ImageEntity originalImage = saveImageEntity(originalFilePath, originalFileName,
+        ImageType.ORIGINAL, "image/" + extension, member, null);
 
     // 압축 이미지 생성 및 저장
     byte[] compressedImage = imageUtil.compressImage(file.getBytes());
@@ -82,9 +80,8 @@ public class ImageService {
     Path compressedFilePath = imageUtil.storeFile(compressedImage,
         imagesDirectory.resolve("compresses").resolve(compressedFileName));
     // 원본 이미지의 id를 참조
-    storedImages.add(
-        saveImageEntity(compressedFilePath, compressedFileName, ImageType.COMPRESSED, "image/jpeg",
-            member, storedImages.get(0)));
+    saveImageEntity(compressedFilePath, compressedFileName, ImageType.COMPRESSED, "image/jpeg",
+        member, originalImage);
 
     // 썸네일 이미지 생성 및 저장
     byte[] thumbnailImage = imageUtil.createThumbnail(file.getBytes(), THUMBNAIL_WIDTH,
@@ -93,15 +90,15 @@ public class ImageService {
     Path thumbnailFilePath = imageUtil.storeFile(thumbnailImage,
         imagesDirectory.resolve("thumbnails").resolve(thumbnailFileName));
     // 원본 이미지의 id를 참조
-    storedImages.add(
-        saveImageEntity(thumbnailFilePath, thumbnailFileName, ImageType.THUMBNAIL, "image/jpeg",
-            member, storedImages.get(0)));
+
+    saveImageEntity(thumbnailFilePath, thumbnailFileName, ImageType.THUMBNAIL, "image/jpeg",
+        member, originalImage);
 
     // OCR 수행 로직(미구현)
 
     // 원본 이미지의 id를 반환
     return ImageUploadResponseDto.builder()
-        .imageId(storedImages.get(0).getImageId())
+        .imageId(originalImage.getImageId())
         .build();
   }
 
@@ -113,6 +110,7 @@ public class ImageService {
         .imageFileName(fileName)
         .imageType(imageType)
         .member(member.toEntity())
+        .originalImage(originalImage)
         .mimeType(mimeType)
         .uploadedAt(LocalDateTime.now())
         .build());
