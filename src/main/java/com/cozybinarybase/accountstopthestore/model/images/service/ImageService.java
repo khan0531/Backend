@@ -79,7 +79,7 @@ public class ImageService {
     // 압축 이미지 생성 및 저장
     byte[] compressedImage = imageUtil.compressImage(file.getBytes());
     String compressedFileName = "comp-" + uuid + "." + "jpg";
-    Path compressedFilePath = imageUtil.storeFile(file.getBytes(),
+    Path compressedFilePath = imageUtil.storeFile(compressedImage,
         imagesDirectory.resolve("compresses").resolve(compressedFileName));
     // 원본 이미지의 id를 참조
     storedImages.add(
@@ -90,7 +90,7 @@ public class ImageService {
     byte[] thumbnailImage = imageUtil.createThumbnail(file.getBytes(), THUMBNAIL_WIDTH,
         THUMBNAIL_HEIGHT);
     String thumbnailFileName = "thumb-" + uuid + "." + "jpg";
-    Path thumbnailFilePath = imageUtil.storeFile(file.getBytes(),
+    Path thumbnailFilePath = imageUtil.storeFile(thumbnailImage,
         imagesDirectory.resolve("thumbnails").resolve(thumbnailFileName));
     // 원본 이미지의 id를 참조
     storedImages.add(
