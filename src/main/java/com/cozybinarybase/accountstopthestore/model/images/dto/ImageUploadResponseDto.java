@@ -1,9 +1,10 @@
 package com.cozybinarybase.accountstopthestore.model.images.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class ImageUploadResponseDto {
-  private String imageUrl;
-  private String thumbnailUrl;
+  private Long imageId;
 }
