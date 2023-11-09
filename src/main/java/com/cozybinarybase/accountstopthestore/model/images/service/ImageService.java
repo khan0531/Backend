@@ -2,6 +2,7 @@ package com.cozybinarybase.accountstopthestore.model.images.service;
 
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.repository.AccountBookRepository;
 import com.cozybinarybase.accountstopthestore.model.images.dto.ImageUploadResponseDto;
+import com.cozybinarybase.accountstopthestore.model.images.exception.FileIsNotValidImageException;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity.ImageType;
 import com.cozybinarybase.accountstopthestore.model.images.persist.repository.ImageRepository;
@@ -54,6 +55,11 @@ public class ImageService {
       Member member) throws IOException {
 
     memberService.validateAndGetMember(member);
+
+    // file이 이미지 mime type이 아닐 경우 예외 처리
+    if (!file.getContentType().startsWith("image")) {
+      throw new FileIsNotValidImageException();
+    }
 
     List<ImageEntity> storedImages = new ArrayList<>();
 
