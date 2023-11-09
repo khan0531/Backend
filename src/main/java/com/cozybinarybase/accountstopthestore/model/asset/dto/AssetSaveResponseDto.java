@@ -13,18 +13,20 @@ import lombok.NoArgsConstructor;
 public class AssetSaveResponseDto {
 
   private Long assetId;
-  private Long memberId;
   private String assetType;
   private String assetName;
+  private Integer statementDay;
+  private Integer dueDay;
   private Long amount;
   private String memo;
 
   public static AssetSaveResponseDto fromEntity(AssetEntity assetEntity) {
     return AssetSaveResponseDto.builder()
         .assetId(assetEntity.getId())
-        .memberId(assetEntity.getMember().getId())
-        .assetType(assetEntity.getType().name())
+        .assetType(assetEntity.getType().getValue())
         .assetName(assetEntity.getName())
+        .statementDay(assetEntity.getStatementDay())
+        .dueDay(assetEntity.getDueDay())
         .amount(assetEntity.getAmount())
         .memo(assetEntity.getMemo())
         .build();

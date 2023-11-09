@@ -1,8 +1,8 @@
 package com.cozybinarybase.accountstopthestore.model.member.controller;
 
-import com.cozybinarybase.accountstopthestore.model.member.dto.MemberResponseDto;
-import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignInRequestDto;
-import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignUpRequestDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignInRequestDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,20 +14,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member")
+@RequestMapping("/auth")
 public class MemberController {
 
   private final MemberService memberService;
 
-  @PostMapping("/sign-up")
-  public ResponseEntity<?> signUp(@RequestBody @Valid MemberSignUpRequestDto memberSignUpRequest) {
-    MemberResponseDto result = this.memberService.signUp(memberSignUpRequest);
-    return ResponseEntity.ok(result);
+  @PostMapping("/sign-up/email")
+  public ResponseEntity<?> signUpWithEmail(@RequestBody @Valid EmailSignUpRequestDto memberSignUpRequest) {
+    EmailSignUpResponseDto response = memberService.signUpWithEmail(memberSignUpRequest);
+    return ResponseEntity.ok(response);
   }
 
-  @PostMapping("/sign-in")
-  public ResponseEntity<?> signIn(@RequestBody @Valid MemberSignInRequestDto memberSignInRequestDto) {
-    this.memberService.signIn(memberSignInRequestDto);
+  @PostMapping("/sign-in/email")
+  public ResponseEntity<?> signInWithEmail(@RequestBody @Valid EmailSignInRequestDto emailSignInRequestDto) {
+    memberService.signInWithEmail(emailSignInRequestDto);
     return ResponseEntity.ok().build();
   }
 }
