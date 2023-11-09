@@ -1,5 +1,8 @@
 package com.cozybinarybase.accountstopthestore.model.accountbook.persist.entity;
 
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.TransactionType;
+import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEntity;
+import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import java.time.LocalDateTime;
@@ -7,6 +10,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -16,35 +20,34 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Getter
-@Setter
+@AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "AccountBook")
+@Builder
+@Setter
+@Getter
+@DynamicUpdate
+@EntityListeners(AuditingEntityListener.class)
+@Entity(name = "AccountBook")
 public class AccountBookEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "accountId", nullable = false, updatable = false)
-  private Long accountId;
-
-  @Column(name = "categoryId", nullable = false)
-  private Long categoryId;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberId", nullable = false)
-  private MemberEntity member;
-
-  @Column(name = "assetId", nullable = false)
-  private Long assetId;
+  private Long id;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "transactionType", columnDefinition = "ENUM('수입', '지출')", nullable = false)
+  @Column(name = "transactionType", nullable = false)
   private TransactionType transactionType;
 
   @Column(name = "transactionDetail", nullable = false)
@@ -62,17 +65,29 @@ public class AccountBookEntity {
   @Column(name = "memo", columnDefinition = "TEXT")
   private String memo;
 
+  @Column(name = "isInstallment", nullable = false)
+  private Boolean isInstallment;
+
+  @CreatedDate
   @Column(name = "createdAt", nullable = false)
   private LocalDateTime createdAt;
 
+  @LastModifiedDate
   @Column(name = "updatedAt", nullable = false)
   private LocalDateTime updatedAt;
 
-  public enum TransactionType {
-    수입, 지출
-  }
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "categoryId")
+  private CategoryEntity category;
 
-  @OneToMany(mappedBy = "accountBook", cascade = CascadeType.ALL, orphanRemoval = true)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "memberId")
+  private MemberEntity member;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "assetId")
+  private AssetEntity asset;
+
+  @OneToMany(mappedBy = "accountBook", cascade = CascadeType.ALL)
   private List<ImageEntity> images;
-
 }
