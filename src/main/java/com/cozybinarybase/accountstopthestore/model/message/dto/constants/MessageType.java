@@ -10,4 +10,3 @@ public enum MessageType {
 
   private final String type;
 }
-ㅌ
