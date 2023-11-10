@@ -23,4 +23,6 @@ public interface AccountBookRepository extends JpaRepository<AccountBookEntity, 
       String keyword, LocalDateTime startDate, LocalDateTime endDate, String categoryName,
       Long minPrice, Long maxPrice, Long memberId, Pageable pageable
   );
+
+  void deleteAllByMemberId(Long id);
 }

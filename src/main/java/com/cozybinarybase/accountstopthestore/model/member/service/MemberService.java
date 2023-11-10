@@ -1,10 +1,15 @@
 package com.cozybinarybase.accountstopthestore.model.member.service;
 
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
+import com.cozybinarybase.accountstopthestore.model.accountbook.persist.repository.AccountBookRepository;
+import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
+import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
+import com.cozybinarybase.accountstopthestore.model.images.persist.repository.ImageRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignInRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.WithdrawalResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
@@ -28,6 +33,11 @@ public class MemberService implements UserDetailsService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final TokenProvider tokenProvider;
+
+  private final AssetRepository assetRepository;
+  private final AccountBookRepository accountBookRepository;
+  private final CategoryRepository categoryRepository;
+  private final ImageRepository imageRepository;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -84,5 +94,18 @@ public class MemberService implements UserDetailsService {
     return memberRepository.findById(member.getId()).orElseThrow(
         MemberNotValidException::new
     );
+  }
+
+  public WithdrawalResponseDto withdrawal(Member member) {
+    MemberEntity memberEntity = this.validateAndGetMember(member);
+    Long memberId = memberEntity.getId();
+    imageRepository.deleteAllByMemberId(memberId);
+    accountBookRepository.deleteAllByMemberId(memberId);
+    assetRepository.deleteAllByMemberId(memberId);
+    categoryRepository.deleteAllByMemberId(memberId);
+    memberRepository.deleteById(memberId);
+    return WithdrawalResponseDto.builder()
+        .message("회원 탈퇴가 완료되었습니다.")
+        .build();
   }
 }

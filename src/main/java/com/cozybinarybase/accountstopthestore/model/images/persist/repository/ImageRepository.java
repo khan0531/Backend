@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ImageRepository extends JpaRepository<ImageEntity, Long> {
   Optional<ImageEntity> findByImageFileName(String imageFileName);
+
+  void deleteAllByMemberId(Long memberId);
 }
