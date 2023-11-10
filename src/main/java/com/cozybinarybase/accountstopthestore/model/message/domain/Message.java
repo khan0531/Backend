@@ -38,6 +38,24 @@ public class Message {
         .toList();
   }
 
+  public static Message createEnterMessage(Long groupId, Long senderId) {
+    return Message.builder()
+        .groupId(groupId)
+        .senderId(senderId)
+        .message(MemberEntity.builder().id(senderId).build().getName() + "님이 입장하셨습니다.")
+        .messageType(MessageType.ENTER)
+        .build();
+  }
+
+  public static Message createLeaveMessage(Long groupId, Long senderId) {
+    return Message.builder()
+        .groupId(groupId)
+        .senderId(senderId)
+        .message(MemberEntity.builder().id(senderId).build().getName() + "님이 퇴장하셨습니다.")
+        .messageType(MessageType.LEAVE)
+        .build();
+  }
+
   public MessageEntity toEntity() {
     return MessageEntity.builder()
         .group(ChallengeGroupEntity.builder().id(groupId).build())

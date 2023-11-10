@@ -11,12 +11,15 @@ import com.cozybinarybase.accountstopthestore.model.challenge.persist.repository
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
+import com.cozybinarybase.accountstopthestore.model.message.domain.Message;
+import com.cozybinarybase.accountstopthestore.model.message.service.MessageService;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,6 +31,8 @@ public class ChallengeGroupService {
   private final ChallengeGroupRepository challengeGroupRepository;
   private final MemberGroupRepository memberGroupRepository;
   private final MemberRepository memberRepository;
+  private final SimpMessagingTemplate messagingTemplate;
+  private final MessageService messageService;
   private final int INVITE_LINK_LENGTH = 10;
   private Map<String, Long> inviteLinkToGroupId = new ConcurrentHashMap<>();
 
@@ -61,9 +66,15 @@ public class ChallengeGroupService {
 
     ChallengeGroupEntity challengeGroupEntity = challengeGroupRepository.findById(groupId)
         .orElseThrow(() -> new IllegalArgumentException("그룹이 존재하지 않습니다."));
+
     if (memberGroupRepository.existsByMemberAndChallengeGroup(member.toEntity(), challengeGroupEntity)) {
       throw new IllegalArgumentException("이미 그룹에 속해있습니다.");
     }
+
+    Message message = Message.createEnterMessage(groupId, member.getId());
+
+    messageService.save(message);
+    messagingTemplate.convertAndSend("/group/" + message.getGroupId(), message);
 
     MemberGroup memberGroup = MemberGroup.create(member.getId(), groupId);
     memberGroupRepository.save(memberGroup.toEntity());
@@ -84,6 +95,10 @@ public class ChallengeGroupService {
       memberGroupRepository.findByMemberAndChallengeGroup(member.toEntity(), challengeGroup.toEntity())
           .ifPresent(memberGroupRepository::delete);
     }
+
+    Message message = Message.createLeaveMessage(groupId, memberId);
+    messageService.save(message);
+    messagingTemplate.convertAndSend("/group/" + message.getGroupId(), message);
   }
 
   public boolean isGroupMember(Long groupId, Member member) {
