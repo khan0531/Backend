@@ -9,7 +9,8 @@ import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignInRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
-import com.cozybinarybase.accountstopthestore.model.member.dto.WithdrawalResponseDto;
+import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.PasswordChangeRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
@@ -96,7 +97,7 @@ public class MemberService implements UserDetailsService {
     );
   }
 
-  public WithdrawalResponseDto withdrawal(Member member) {
+  public MessageResponseDto withdrawal(Member member) {
     MemberEntity memberEntity = this.validateAndGetMember(member);
     Long memberId = memberEntity.getId();
     imageRepository.deleteAllByMemberId(memberId);
@@ -104,8 +105,17 @@ public class MemberService implements UserDetailsService {
     assetRepository.deleteAllByMemberId(memberId);
     categoryRepository.deleteAllByMemberId(memberId);
     memberRepository.deleteById(memberId);
-    return WithdrawalResponseDto.builder()
+    return MessageResponseDto.builder()
         .message("회원 탈퇴가 완료되었습니다.")
+        .build();
+  }
+
+  public MessageResponseDto changePassword(PasswordChangeRequestDto requestDto, Member member) {
+    MemberEntity memberEntity = this.validateAndGetMember(member);
+    memberEntity.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+
+    return MessageResponseDto.builder()
+        .message("비밀번호가 변경되었습니다.")
         .build();
   }
 }

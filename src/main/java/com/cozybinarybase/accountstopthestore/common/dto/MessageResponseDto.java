@@ -1,4 +1,4 @@
-package com.cozybinarybase.accountstopthestore.model.member.dto;
+package com.cozybinarybase.accountstopthestore.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WithdrawalResponseDto {
+public class MessageResponseDto {
   private String message;
 }
