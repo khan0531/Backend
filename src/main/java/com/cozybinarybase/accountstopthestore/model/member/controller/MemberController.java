@@ -2,11 +2,13 @@ package com.cozybinarybase.accountstopthestore.model.member.controller;
 
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailCodeRequestDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailCodeVerifyRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignInRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
 import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.PasswordChangeRequestDto;
+import com.cozybinarybase.accountstopthestore.model.member.exception.VerificationCodeException;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +58,20 @@ public class MemberController {
   public ResponseEntity<?> sendEmailVerificationCode(@RequestBody EmailCodeRequestDto requestDto) {
     MessageResponseDto response = memberService.sendEmailVerificationCode(requestDto.getEmail());
     return ResponseEntity.ok(response);
+  }
+
+  @PutMapping("/email-verifications")
+  public ResponseEntity<?> verifyEmail(@RequestBody EmailCodeVerifyRequestDto requestDto) {
+    try {
+      boolean isVerified = memberService.verifyEmail(requestDto);
+
+      if (isVerified) {
+        return ResponseEntity.ok().body("이메일 인증에 성공했습니다.");
+      } else {
+        return ResponseEntity.badRequest().body("올바른 코드가 아닙니다.");
+      }
+    } catch (VerificationCodeException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 }

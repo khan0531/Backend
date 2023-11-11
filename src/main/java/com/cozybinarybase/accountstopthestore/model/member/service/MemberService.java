@@ -1,16 +1,17 @@
 package com.cozybinarybase.accountstopthestore.model.member.service;
 
 import com.cozybinarybase.accountstopthestore.common.SimpleEmailService;
+import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.repository.AccountBookRepository;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
 import com.cozybinarybase.accountstopthestore.model.images.persist.repository.ImageRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
-import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailCodeVerifyRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignInRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
-import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.PasswordChangeRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.VerificationCode;
@@ -19,9 +20,11 @@ import com.cozybinarybase.accountstopthestore.model.member.persist.repository.Ve
 import com.cozybinarybase.accountstopthestore.model.member.service.util.MemberUtil;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -47,6 +50,7 @@ public class MemberService implements UserDetailsService {
 
   private final SimpleEmailService simpleEmailService;
   private final MemberUtil memberUtil;
+  private final StringRedisTemplate stringRedisTemplate;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -135,10 +139,26 @@ public class MemberService implements UserDetailsService {
     VerificationCode verificationCode = new VerificationCode();
     verificationCode.setEmail(email);
     verificationCode.setCode(code);
+    verificationCode.setVerified(false);
     verificationCodeRepository.save(verificationCode);
 
     return MessageResponseDto.builder()
         .message("이메일 인증 메일을 전송했습니다.")
         .build();
+  }
+
+  public boolean verifyEmail(EmailCodeVerifyRequestDto requestDto) {
+    VerificationCode verificationCode = verificationCodeRepository.findById(requestDto.getEmail())
+        .orElseThrow(() -> new IllegalArgumentException("인증 코드가 존재하지 않습니다."));
+
+    if (verificationCode != null && verificationCode.getCode().equals(requestDto.getCode())) {
+      verificationCode.setVerified(true);
+      verificationCode.setTtl(TimeUnit.MINUTES.toSeconds(20));
+      verificationCodeRepository.save(verificationCode); // 인증 상태 업데이트
+
+      return true;
+    }
+
+    return false;
   }
 }
