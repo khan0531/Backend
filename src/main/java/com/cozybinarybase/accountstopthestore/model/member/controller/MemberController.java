@@ -1,6 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.member.controller;
 
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailCodeRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignInRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
@@ -48,6 +49,12 @@ public class MemberController {
   public ResponseEntity<?> changePassword(@RequestBody @Valid PasswordChangeRequestDto requestDto,
       @AuthenticationPrincipal Member member) {
     MessageResponseDto response = memberService.changePassword(requestDto, member);
+    return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/email-verifications")
+  public ResponseEntity<?> sendEmailVerificationCode(@RequestBody EmailCodeRequestDto requestDto) {
+    MessageResponseDto response = memberService.sendEmailVerificationCode(requestDto.getEmail());
     return ResponseEntity.ok(response);
   }
 }

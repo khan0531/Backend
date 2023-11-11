@@ -1,5 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.member.service;
 
+import com.cozybinarybase.accountstopthestore.common.SimpleEmailService;
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.repository.AccountBookRepository;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
@@ -13,6 +14,7 @@ import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.PasswordChangeRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
+import com.cozybinarybase.accountstopthestore.model.member.service.util.MemberUtil;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
 import java.util.Objects;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +41,9 @@ public class MemberService implements UserDetailsService {
   private final AccountBookRepository accountBookRepository;
   private final CategoryRepository categoryRepository;
   private final ImageRepository imageRepository;
+
+  private final SimpleEmailService simpleEmailService;
+  private final MemberUtil memberUtil;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -116,6 +121,14 @@ public class MemberService implements UserDetailsService {
 
     return MessageResponseDto.builder()
         .message("비밀번호가 변경되었습니다.")
+        .build();
+  }
+
+  public MessageResponseDto sendEmailVerificationCode(String email) {
+    simpleEmailService.sendEmail(email, "가게그만가계 가입 인증 코드입니다.",
+        memberUtil.verificationCodeGenerator());
+    return MessageResponseDto.builder()
+        .message("이메일 인증 메일을 전송했습니다.")
         .build();
   }
 }
