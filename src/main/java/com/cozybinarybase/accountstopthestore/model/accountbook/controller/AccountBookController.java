@@ -113,4 +113,14 @@ public class AccountBookController {
         accountId, member);
     return ResponseEntity.ok().body(accountBookImages);
   }
+
+  @GetMapping("/statistics")
+  public ResponseEntity<?> getTransactionStatistics(
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+      @RequestParam TransactionType transactionType,
+      @AuthenticationPrincipal Member member) {
+    return ResponseEntity.ok().body(accountBookService.getTransactionStatistics(
+        startDate, endDate, transactionType, member));
+  }
 }
