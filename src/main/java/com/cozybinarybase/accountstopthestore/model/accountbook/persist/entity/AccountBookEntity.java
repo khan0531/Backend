@@ -5,6 +5,7 @@ import com.cozybinarybase.accountstopthestore.model.asset.persist.entity.AssetEn
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
+import com.querydsl.core.annotations.QueryEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -38,6 +39,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
+@QueryEntity
 @Entity(name = "AccountBook")
 public class AccountBookEntity {
 

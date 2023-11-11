@@ -7,6 +7,8 @@ import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookS
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookSaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.StatisticsData;
+import com.cozybinarybase.accountstopthestore.model.accountbook.dto.TransactionStatisticsResponse;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.AccountBookCategoryResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.TransactionType;
 import com.cozybinarybase.accountstopthestore.model.accountbook.exception.AccountBookNotValidException;
@@ -173,5 +175,19 @@ public class AccountBookService {
     return images.stream()
         .map(AccountBookImageResponseDto::of)
         .collect(Collectors.toList());
+  }
+
+  public TransactionStatisticsResponse getTransactionStatistics(LocalDate startDate,
+      LocalDate endDate, TransactionType transactionType, Member member) {
+    memberService.validateAndGetMember(member);
+
+    List<StatisticsData> statistics = accountBookRepository.findTransactionStatistics(startDate,
+        endDate, transactionType, member.getId());
+    return TransactionStatisticsResponse.builder()
+        .startDate(startDate)
+        .endDate(endDate)
+        .transactionType(transactionType)
+        .statisticsData(statistics)
+        .build();
   }
 }
