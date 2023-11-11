@@ -13,7 +13,9 @@ import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpReques
 import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.PasswordChangeRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
+import com.cozybinarybase.accountstopthestore.model.member.persist.entity.VerificationCode;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
+import com.cozybinarybase.accountstopthestore.model.member.persist.repository.VerificationCodeRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.util.MemberUtil;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
 import java.util.Objects;
@@ -41,6 +43,7 @@ public class MemberService implements UserDetailsService {
   private final AccountBookRepository accountBookRepository;
   private final CategoryRepository categoryRepository;
   private final ImageRepository imageRepository;
+  private final VerificationCodeRepository verificationCodeRepository;
 
   private final SimpleEmailService simpleEmailService;
   private final MemberUtil memberUtil;
@@ -125,8 +128,15 @@ public class MemberService implements UserDetailsService {
   }
 
   public MessageResponseDto sendEmailVerificationCode(String email) {
-    simpleEmailService.sendEmail(email, "가게그만가계 가입 인증 코드입니다.",
-        memberUtil.verificationCodeGenerator());
+    String code = memberUtil.verificationCodeGenerator();
+
+    simpleEmailService.sendEmail(email, "가게그만가계 가입 인증 코드입니다.", code);
+
+    VerificationCode verificationCode = new VerificationCode();
+    verificationCode.setEmail(email);
+    verificationCode.setCode(code);
+    verificationCodeRepository.save(verificationCode);
+
     return MessageResponseDto.builder()
         .message("이메일 인증 메일을 전송했습니다.")
         .build();

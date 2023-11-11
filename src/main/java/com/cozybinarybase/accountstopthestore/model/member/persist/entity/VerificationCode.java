@@ -1,0 +1,21 @@
+package com.cozybinarybase.accountstopthestore.model.member.persist.entity;
+
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+
+@RedisHash(value = "VerificationCode", timeToLive = 60)
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class VerificationCode implements Serializable {
+
+  @Id
+  private String email;
+  private String code;
+}

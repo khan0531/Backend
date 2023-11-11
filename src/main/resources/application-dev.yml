@@ -38,6 +38,9 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 5MB
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
 
 jwt:
   secretKey: SeCrEtKeY4HaShInG

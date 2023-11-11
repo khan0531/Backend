@@ -33,7 +33,7 @@ public class SimpleEmailService {
                     .build())
                 .build())
             .build())
-        .source("lim7897@gmail.com")
+        .source("no-reply@asts.cozybinarybase.com")
         .build();
 
     sesClient.sendEmail(request);
