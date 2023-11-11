@@ -52,7 +52,7 @@ public class AccountBookService {
             requestDto.getCategoryName(), member.getId())
         .orElseThrow(CategoryNotValidException::new);
 
-    AssetEntity assetEntity = assetRepository.findByNameAndMember_Id(requestDto.getAssetType(),
+    AssetEntity assetEntity = assetRepository.findByNameAndMember_Id(requestDto.getAssetName(),
         member.getId()).orElseThrow(
         AssetNotValidException::new);
 
@@ -76,7 +76,7 @@ public class AccountBookService {
             requestDto.getCategoryName(), member.getId())
         .orElseThrow(CategoryNotValidException::new);
 
-    assetRepository.findByNameAndMember_Id(requestDto.getAssetType(),
+    assetRepository.findByNameAndMember_Id(requestDto.getAssetName(),
         member.getId()).orElseThrow(
         AssetNotValidException::new);
 
@@ -189,5 +189,15 @@ public class AccountBookService {
         .transactionType(transactionType)
         .statisticsData(statistics)
         .build();
+  }
+
+  public AccountBookResponseDto getAccountBook(Long accountId, Member member) {
+    memberService.validateAndGetMember(member);
+
+    AccountBookEntity accountBookEntity = accountBookRepository.findByIdAndMember_Id(accountId,
+            member.getId())
+        .orElseThrow(AccountBookNotValidException::new);
+
+    return AccountBookResponseDto.fromEntity(accountBookEntity);
   }
 }

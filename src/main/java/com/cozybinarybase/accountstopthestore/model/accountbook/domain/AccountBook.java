@@ -45,6 +45,7 @@ public class AccountBook {
         .transactedAt(requestDto.getTransactedAt())
         .amount(requestDto.getAmount())
         .memo(requestDto.getMemo())
+        .address(requestDto.getAddress())
         .isInstallment(requestDto.getIsInstallment())
         .categoryId(categoryId)
         .assetId(assetId)
@@ -58,8 +59,8 @@ public class AccountBook {
     if (requestDto.getCategoryName() != null) {
       this.categoryName = requestDto.getCategoryName();
     }
-    if (requestDto.getAssetType() != null) {
-      this.assetName = requestDto.getAssetType();
+    if (requestDto.getAssetName() != null) {
+      this.assetName = requestDto.getAssetName();
     }
     if (requestDto.getAmount() != null) {
       this.amount = requestDto.getAmount();
@@ -75,6 +76,9 @@ public class AccountBook {
     }
     if (requestDto.getMemo() != null) {
       this.memo = requestDto.getMemo();
+    }
+    if (requestDto.getAddress() != null) {
+      this.address = requestDto.getAddress();
     }
     if (requestDto.getIsInstallment() != null) {
       this.isInstallment = requestDto.getIsInstallment();

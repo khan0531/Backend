@@ -19,7 +19,7 @@ public class AccountBookSaveResponseDto {
 
   private Long accountId;
   private String categoryName;
-  private String assetType;
+  private String assetName;
   private Long amount;
   private String transactionType;
   private String transactionDetail;
@@ -27,6 +27,7 @@ public class AccountBookSaveResponseDto {
   @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime transactedAt;
 
+  private String address;
   private String memo;
   private List<ImageEntity> imageIds;
   private String recurringType;
@@ -39,11 +40,12 @@ public class AccountBookSaveResponseDto {
     return AccountBookSaveResponseDto.builder()
         .accountId(accountBookEntity.getId())
         .categoryName(accountBookEntity.getCategory().getName())
-        .assetType(accountBookEntity.getAsset().getName())
+        .assetName(accountBookEntity.getAsset().getName())
         .amount(accountBookEntity.getAmount())
         .transactionType(accountBookEntity.getTransactionType().getValue())
         .transactionDetail(accountBookEntity.getTransactionDetail())
         .transactedAt(accountBookEntity.getTransactedAt())
+        .address(accountBookEntity.getAddress())
         .memo(accountBookEntity.getMemo())
         .imageIds(accountBookEntity.getImages())
         .isInstallment(accountBookEntity.getIsInstallment())

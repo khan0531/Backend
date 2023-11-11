@@ -16,8 +16,8 @@ public class AccountBookSaveRequestDto {
   @NotBlank(message = "카테고리명을 입력해주시길 바랍니다.")
   private String categoryName;
 
-  @NotBlank(message = "자산 유형을 입력해주시길 바랍니다.")
-  private String assetType;
+  @NotBlank(message = "자산 이름을 입력해주시길 바랍니다.")
+  private String assetName;
 
   @Positive(message = "양수의 값만 입력할 수 있습니다.")
   private Long amount;
@@ -25,13 +25,14 @@ public class AccountBookSaveRequestDto {
   @NotNull(message = "거래 유형을 입력해주시길 바랍니다.")
   private TransactionType transactionType;
 
-  @NotBlank(message = "사용 내역을 입력해주시길 바랍니다.")
+  @NotBlank(message = "사용처를 입력해주시길 바랍니다.")
   private String transactionDetail;
 
   @NotNull(message = "사용 일자를 입력해주시길 바랍니다.")
   @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime transactedAt;
 
+  private String address;
   private String memo;
   private RecurringType recurringType;
   private Boolean isInstallment;

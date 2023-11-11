@@ -12,6 +12,7 @@ import com.cozybinarybase.accountstopthestore.model.accountbook.service.AccountB
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import java.time.LocalDate;
 import java.util.List;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -34,9 +35,17 @@ public class AccountBookController {
 
   private final AccountBookService accountBookService;
 
+  @GetMapping("/{accountId}")
+  public ResponseEntity<?> getAccountBook(
+      @PathVariable Long accountId,
+      @AuthenticationPrincipal Member member) {
+    AccountBookResponseDto responseDto = accountBookService.getAccountBook(accountId, member);
+    return ResponseEntity.ok().body(responseDto);
+  }
+
   @PostMapping
   public ResponseEntity<?> saveAccountBook(
-      @RequestBody AccountBookSaveRequestDto requestDto,
+      @RequestBody @Valid AccountBookSaveRequestDto requestDto,
       @AuthenticationPrincipal Member member
   ) {
     AccountBookSaveResponseDto responseDto =
@@ -47,7 +56,7 @@ public class AccountBookController {
   @PutMapping("/{accountId}")
   public ResponseEntity<?> updateAccountBook(
       @PathVariable Long accountId,
-      @RequestBody AccountBookUpdateRequestDto requestDto,
+      @RequestBody @Valid AccountBookUpdateRequestDto requestDto,
       @AuthenticationPrincipal Member member) {
     AccountBookUpdateResponseDto responseDto =
         accountBookService.updateAccountBook(accountId, requestDto, member);
