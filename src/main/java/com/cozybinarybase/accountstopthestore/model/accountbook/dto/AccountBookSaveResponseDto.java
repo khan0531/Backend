@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,7 +30,7 @@ public class AccountBookSaveResponseDto {
 
   private String address;
   private String memo;
-  private List<ImageEntity> imageIds;
+  private List<Long> imageIds;
   private String recurringType;
   private Boolean isInstallment;
 
@@ -37,6 +38,10 @@ public class AccountBookSaveResponseDto {
   private LocalDateTime createdAt;
 
   public static AccountBookSaveResponseDto fromEntity(AccountBookEntity accountBookEntity) {
+    List<Long> imageIdList = accountBookEntity.getImages().stream()
+        .map(ImageEntity::getImageId)
+        .collect(Collectors.toList());
+
     return AccountBookSaveResponseDto.builder()
         .accountId(accountBookEntity.getId())
         .categoryName(accountBookEntity.getCategory().getName())
@@ -47,7 +52,7 @@ public class AccountBookSaveResponseDto {
         .transactedAt(accountBookEntity.getTransactedAt())
         .address(accountBookEntity.getAddress())
         .memo(accountBookEntity.getMemo())
-        .imageIds(accountBookEntity.getImages())
+        .imageIds(imageIdList)
         .isInstallment(accountBookEntity.getIsInstallment())
         .createdAt(accountBookEntity.getCreatedAt())
         .build();

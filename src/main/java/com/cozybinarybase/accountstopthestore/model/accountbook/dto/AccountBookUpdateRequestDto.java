@@ -5,6 +5,7 @@ import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.Tr
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -32,6 +33,7 @@ public class AccountBookUpdateRequestDto {
   @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime transactedAt;
 
+  private List<Long> imageIds;
   private String address;
   private String memo;
   private RecurringType recurringType;
