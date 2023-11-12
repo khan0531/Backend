@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,8 +28,9 @@ public class AccountBookResponseDto {
   @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime transactedAt;
 
+  private String address;
   private String memo;
-  private List<ImageEntity> imageIds;
+  private List<Long> imageIds;
   private String recurringType;
   private Boolean isInstallment;
 
@@ -39,6 +41,10 @@ public class AccountBookResponseDto {
   private LocalDateTime updatedAt;
 
   public static AccountBookResponseDto fromEntity(AccountBookEntity accountBookEntity) {
+    List<Long> imageIdList = accountBookEntity.getImages().stream()
+        .map(ImageEntity::getImageId)
+        .collect(Collectors.toList());
+
     return AccountBookResponseDto.builder()
         .accountId(accountBookEntity.getId())
         .categoryName(accountBookEntity.getCategory().getName())
@@ -48,7 +54,8 @@ public class AccountBookResponseDto {
         .transactionDetail(accountBookEntity.getTransactionDetail())
         .transactedAt(accountBookEntity.getTransactedAt())
         .memo(accountBookEntity.getMemo())
-        .imageIds(accountBookEntity.getImages())
+        .address(accountBookEntity.getAddress())
+        .imageIds(imageIdList)
         .isInstallment(accountBookEntity.getIsInstallment())
         .createdAt(accountBookEntity.getCreatedAt())
         .updatedAt(accountBookEntity.getUpdatedAt())
