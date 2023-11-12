@@ -76,12 +76,12 @@ public class MemberService implements UserDetailsService {
       throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
     });
 
-    VerificationCode verificationCode = verificationCodeRepository.findById(memberSignUpRequest.getEmail())
-        .orElseThrow(() -> new IllegalArgumentException("이메일 인증이 필요합니다."));
-
-    if (!verificationCode.isVerified()) {
-      throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
-    }
+//    VerificationCode verificationCode = verificationCodeRepository.findById(memberSignUpRequest.getEmail())
+//        .orElseThrow(() -> new IllegalArgumentException("이메일 인증 요청이 필요합니다."));
+//
+//    if (!verificationCode.isVerified()) {
+//      throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
+//    }
 
     Member member = Member.fromSignUpDto(memberSignUpRequest);
     member.passwordEncode(this.passwordEncoder);
