@@ -118,4 +118,16 @@ public class GlobalExceptionHandler {
         .status(HttpStatus.BAD_REQUEST)
         .body(errorDetails);
   }
+
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<?> handleRuntimeException(RuntimeException e) {
+    log.error("에러 발생: {}", e.toString());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", (e.getMessage() != null) ? e.getMessage() : "내부 서버 에러");
+
+    return ResponseEntity
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(errorDetails);
+  }
 }
