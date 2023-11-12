@@ -93,4 +93,16 @@ public class GlobalExceptionHandler {
         .status(HttpStatus.BAD_REQUEST)
         .body(errors);
   }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
 }
