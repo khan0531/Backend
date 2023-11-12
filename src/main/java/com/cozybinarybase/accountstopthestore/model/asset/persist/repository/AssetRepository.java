@@ -13,4 +13,6 @@ public interface AssetRepository extends JpaRepository<AssetEntity, Long> {
   List<AssetEntity> findByMember_Id(Long memberId);
 
   Optional<AssetEntity> findByNameAndMember_Id(String name, Long memberId);
+
+  void deleteAllByMemberId(Long id);
 }

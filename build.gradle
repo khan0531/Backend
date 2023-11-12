@@ -13,6 +13,9 @@ java {
 }
 
 configurations {
+	all {
+		exclude group: "org.slf4j", module: "slf4j-simple"
+	}
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
@@ -48,6 +51,16 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	// aws ses
+	implementation platform('software.amazon.awssdk:bom:2.15.0')
+	implementation 'software.amazon.awssdk:ses'
+
+	// redis
+	implementation 'it.ozimov:embedded-redis:0.7.3'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'io.lettuce:lettuce-core:6.2.6.RELEASE'
+
 }
 
 // QueryDSL 플러그인 설정
