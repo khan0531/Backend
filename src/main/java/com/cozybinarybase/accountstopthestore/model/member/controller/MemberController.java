@@ -8,13 +8,17 @@ import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignInReques
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
 import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.PasswordChangeRequestDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.ResetPasswordLinkRequestDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.ResetPasswordRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.exception.VerificationCodeException;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -73,5 +77,21 @@ public class MemberController {
     } catch (VerificationCodeException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
+
+  @PostMapping("/reset-password")
+  public ResponseEntity<?> sendResetPasswordLink(@RequestBody ResetPasswordLinkRequestDto requestDto) {
+    MessageResponseDto response = memberService.sendResetPasswordLink(requestDto.getEmail());
+    return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/reset-password/{memberId}/t/{token}")
+  public ResponseEntity<?> resetPassword(
+      @PathVariable Long memberId,
+      @PathVariable String token,
+      @RequestBody ResetPasswordRequestDto requestDto) {
+
+    MessageResponseDto response = memberService.resetPassword(memberId, token, requestDto.getPassword());
+    return ResponseEntity.ok(response);
   }
 }

@@ -14,12 +14,16 @@ import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpReques
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.PasswordChangeRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
+import com.cozybinarybase.accountstopthestore.model.member.persist.entity.PasswordReset;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.VerificationCode;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
+import com.cozybinarybase.accountstopthestore.model.member.persist.repository.PasswordResetRepository;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.VerificationCodeRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.util.MemberUtil;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
@@ -47,6 +51,7 @@ public class MemberService implements UserDetailsService {
   private final CategoryRepository categoryRepository;
   private final ImageRepository imageRepository;
   private final VerificationCodeRepository verificationCodeRepository;
+  private final PasswordResetRepository passwordResetRepository;
 
   private final SimpleEmailService simpleEmailService;
   private final MemberUtil memberUtil;
@@ -167,5 +172,45 @@ public class MemberService implements UserDetailsService {
     }
 
     return false;
+  }
+
+  public MessageResponseDto sendResetPasswordLink(String email) {
+    String token = UUID.randomUUID().toString();
+    MemberEntity memberEntity = memberRepository.findMemberIdByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 이메일입니다. 회원가입을 먼저 진행해 주세요."));
+
+    Long memberId = memberEntity.getId();
+
+    simpleEmailService.sendEmail(email, "가게그만가계 비밀번호 재설정 링크입니다.",
+        String.format("%s/auth/reset-password/%d/t/%s", "http://localhost:3000", memberId, token));
+
+    PasswordReset passwordReset = new PasswordReset();
+    passwordReset.setEmail(email);
+    passwordReset.setMemberId(memberId);
+    passwordReset.setToken(token);
+    passwordResetRepository.save(passwordReset);
+
+    return MessageResponseDto.builder()
+        .message("이메일 인증 메일을 전송했습니다.")
+        .build();
+  }
+
+  public MessageResponseDto resetPassword(Long memberId, String token, String newPassword) {
+    PasswordReset passwordReset = passwordResetRepository.findById(memberId)
+        .orElseThrow(() -> new IllegalArgumentException("비밀번호 재설정 토큰이 존재하지 않습니다."));
+
+    if (!passwordReset.getToken().equals(token)) {
+      throw new IllegalArgumentException("비밀번호 재설정 토큰이 일치하지 않습니다.");
+    }
+
+    MemberEntity memberEntity = memberRepository.findById(passwordReset.getMemberId())
+        .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+    memberEntity.setPassword(passwordEncoder.encode(newPassword));
+    memberRepository.save(memberEntity);
+
+    return MessageResponseDto.builder()
+        .message("비밀번호가 변경되었습니다.")
+        .build();
   }
 }
