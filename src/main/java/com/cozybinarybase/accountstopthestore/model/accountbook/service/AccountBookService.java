@@ -21,6 +21,9 @@ import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryN
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity;
+import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity.ImageType;
+import com.cozybinarybase.accountstopthestore.model.images.persist.repository.ImageRepository;
+import com.cozybinarybase.accountstopthestore.model.images.exception.ImageNotValidException;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.time.LocalDate;
@@ -42,6 +45,7 @@ public class AccountBookService {
   private final AssetRepository assetRepository;
   private final MemberService memberService;
   private final AccountBook accountBook;
+  private final ImageRepository imageRepository;
 
   @Transactional
   public AccountBookSaveResponseDto saveAccountBook(
@@ -56,10 +60,24 @@ public class AccountBookService {
         member.getId()).orElseThrow(
         AssetNotValidException::new);
 
-    AccountBookEntity accountBookEntity = accountBookRepository.save(
-        accountBook.createAccountBook(requestDto, categoryEntity.getId(), assetEntity.getId(),
-            member.getId(), categoryEntity.getName(), assetEntity.getName()).toEntity());
+    List<ImageEntity> images = requestDto.getImageIds().stream()
+        .map(imageId -> imageRepository.findByImageIdAndImageTypeAndMember_Id(imageId, ImageType.ORIGINAL, member.getId())
+            .orElseThrow(() -> new ImageNotValidException()))
+        .collect(Collectors.toList());
 
+    AccountBookEntity accountBookEntity = accountBook.createAccountBook(
+        requestDto, categoryEntity.getId(), assetEntity.getId(), member.getId(),
+        categoryEntity.getName(), assetEntity.getName(), images).toEntity();
+
+    AccountBookEntity finalAccountBookEntity = accountBookEntity;
+    images.forEach(image -> image.setAccountBook(finalAccountBookEntity));
+
+    accountBookEntity.setImages(images);
+
+    // AccountBookEntity 저장
+    accountBookEntity = accountBookRepository.save(accountBookEntity);
+
+    // DTO 변환 및 반환
     return AccountBookSaveResponseDto.fromEntity(accountBookEntity);
   }
 
@@ -68,25 +86,36 @@ public class AccountBookService {
       AccountBookUpdateRequestDto requestDto, Member member) {
     memberService.validateAndGetMember(member);
 
-    AccountBookEntity accountBookEntity = accountBookRepository.findByIdAndMember_Id(accountId,
-            member.getId())
+    AccountBookEntity accountBookEntity = accountBookRepository.findByIdAndMember_Id(accountId, member.getId())
         .orElseThrow(AccountBookNotValidException::new);
 
-    categoryRepository.findByNameAndMember_Id(
+    CategoryEntity categoryEntity = categoryRepository.findByNameAndMember_Id(
             requestDto.getCategoryName(), member.getId())
         .orElseThrow(CategoryNotValidException::new);
 
-    assetRepository.findByNameAndMember_Id(requestDto.getAssetName(),
+    AssetEntity assetEntity = assetRepository.findByNameAndMember_Id(requestDto.getAssetName(),
         member.getId()).orElseThrow(
         AssetNotValidException::new);
 
+    List<ImageEntity> images = requestDto.getImageIds().stream()
+        .map(imageId -> imageRepository.findByImageIdAndImageTypeAndMember_Id(imageId, ImageType.ORIGINAL, member.getId())
+            .orElseThrow(ImageNotValidException::new))
+        .collect(Collectors.toList());
+
     AccountBook accountBookDomain = AccountBook.fromEntity(accountBookEntity);
-    accountBookDomain.updateAccountBook(requestDto);
+    accountBookDomain.updateAccountBook(requestDto, categoryEntity.getId(), assetEntity.getId(), images);
 
-    AccountBookEntity updateAccountBookEntity = accountBookDomain.toEntity();
-    accountBookRepository.save(updateAccountBookEntity);
 
-    return AccountBookUpdateResponseDto.fromEntity(updateAccountBookEntity);
+    images.forEach(image -> {
+      image.setAccountBook(accountBookEntity);
+      imageRepository.save(image);
+    });
+
+    accountBookEntity.setImages(images);
+
+    AccountBookEntity updatedAccountBookEntity = accountBookRepository.save(accountBookEntity);
+
+    return AccountBookUpdateResponseDto.fromEntity(updatedAccountBookEntity);
   }
 
   @Transactional
@@ -170,10 +199,24 @@ public class AccountBookService {
             member.getId())
         .orElseThrow(AccountBookNotValidException::new);
 
-    List<ImageEntity> images = accountBookEntity.getImages();
+    List<ImageEntity> originalImages = accountBookEntity.getImages().stream()
+        .filter(image -> image.getImageType() == ImageEntity.ImageType.ORIGINAL)
+        .collect(Collectors.toList());
 
-    return images.stream()
-        .map(AccountBookImageResponseDto::of)
+    return originalImages.stream()
+        .map(originalImage -> {
+          String compressedImageUrl = imageRepository.findByOriginalImage_ImageIdAndImageType(
+                  originalImage.getImageId(), ImageEntity.ImageType.COMPRESSED)
+              .map(img -> "http://localhost:8080/images/" + img.getImageFileName())
+              .orElse(null);
+
+          String thumbnailUrl = imageRepository.findByOriginalImage_ImageIdAndImageType(
+                  originalImage.getImageId(), ImageEntity.ImageType.THUMBNAIL)
+              .map(img -> "http://localhost:8080/images/" + img.getImageFileName())
+              .orElse(null);
+
+          return new AccountBookImageResponseDto(originalImage.getImageId(), compressedImageUrl, thumbnailUrl);
+        })
         .collect(Collectors.toList());
   }
 
