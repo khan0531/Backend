@@ -1,5 +1,5 @@
 server:
-  port: 443
+  port: 8443
   ssl:
     key-store: ${SSL_KEYSTORE_PATH}
     key-store-password: ${SSL_KEYSTORE_PASSWORD}
