@@ -16,7 +16,7 @@ spring:
 #        enabled: true
     url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/demo
     username: root
-    password: 7845120qwe
+    password: ${MYSQL_PASSWORD:7845120qwe}
     driver-class-name: com.mysql.cj.jdbc.Driver
   mvc:
     pathmatch:
