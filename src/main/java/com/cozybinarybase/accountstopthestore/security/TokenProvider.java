@@ -26,6 +26,7 @@ public class TokenProvider {
   public static final String ACCESS_TOKEN_HEADER = "Authorization";
   public static final String TOKEN_PREFIX = "Bearer ";
   private static final String REFRESH_TOKEN_HEADER = "Authorization-refresh";
+  
   private final MemberRepository memberRepository;
 
   @Value("${jwt.secretKey}")
