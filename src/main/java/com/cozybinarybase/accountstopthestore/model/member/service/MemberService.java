@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -55,7 +56,9 @@ public class MemberService implements UserDetailsService {
 
   private final SimpleEmailService simpleEmailService;
   private final MemberUtil memberUtil;
-  private final StringRedisTemplate stringRedisTemplate;
+
+  @Value("${spring.profiles.active}")
+  private String activeProfile;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -76,12 +79,14 @@ public class MemberService implements UserDetailsService {
       throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
     });
 
-//    VerificationCode verificationCode = verificationCodeRepository.findById(memberSignUpRequest.getEmail())
-//        .orElseThrow(() -> new IllegalArgumentException("이메일 인증 요청이 필요합니다."));
-//
-//    if (!verificationCode.isVerified()) {
-//      throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
-//    }
+    if ("prod".equals(activeProfile)) {
+      VerificationCode verificationCode = verificationCodeRepository.findById(memberSignUpRequest.getEmail())
+          .orElseThrow(() -> new IllegalArgumentException("이메일 인증 요청이 필요합니다."));
+
+      if (!verificationCode.isVerified()) {
+        throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
+      }
+    }
 
     Member member = Member.fromSignUpDto(memberSignUpRequest);
     member.passwordEncode(this.passwordEncoder);

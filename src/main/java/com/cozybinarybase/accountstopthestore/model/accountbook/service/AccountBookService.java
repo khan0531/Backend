@@ -27,6 +27,8 @@ import com.cozybinarybase.accountstopthestore.model.images.exception.ImageNotVal
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -130,11 +132,14 @@ public class AccountBookService {
   }
 
   @Transactional(readOnly = true)
-  public List<AccountBookResponseDto> getAccountBooks(LocalDate startDate, LocalDate endDate,
+  public List<AccountBookResponseDto> getAccountBooks(LocalDateTime startDateTime, LocalDateTime endDateTime,
       TransactionType transactionType, int page, int limit, Member member) {
     memberService.validateAndGetMember(member);
 
-    if (startDate.isAfter(endDate) || endDate.isBefore(startDate)) {
+    startDateTime = startDateTime.toLocalDate().atStartOfDay();
+    endDateTime = endDateTime.toLocalDate().atTime(LocalTime.MAX);
+
+    if (startDateTime.isAfter(endDateTime)) {
       throw new AccountBookNotValidException("날짜 설정을 다시 해주시길 바랍니다.");
     }
 
@@ -142,8 +147,8 @@ public class AccountBookService {
 
     List<AccountBookEntity> accountBookEntityList =
         accountBookRepository.findByCreatedAtBetweenAndTransactionTypeAndMember_Id(
-            startDate.atStartOfDay(),
-            endDate.atStartOfDay(),
+            startDateTime,
+            endDateTime,
             transactionType,
             member.getId(),
             pageable).getContent();

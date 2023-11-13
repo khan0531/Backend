@@ -11,6 +11,7 @@ import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.Tr
 import com.cozybinarybase.accountstopthestore.model.accountbook.service.AccountBookService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -73,15 +74,15 @@ public class AccountBookController {
 
   @GetMapping
   public ResponseEntity<?> getAccountBooks(
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime,
       @RequestParam TransactionType transactionType,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int limit,
       @AuthenticationPrincipal Member member) {
+
     List<AccountBookResponseDto> accountBookResponseDtoList =
-        accountBookService.getAccountBooks(startDate, endDate, transactionType, page, limit,
-            member);
+        accountBookService.getAccountBooks(startDateTime, endDateTime, transactionType, page, limit, member);
 
     return ResponseEntity.ok().body(accountBookResponseDtoList);
   }
