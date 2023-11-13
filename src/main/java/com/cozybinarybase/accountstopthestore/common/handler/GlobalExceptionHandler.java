@@ -1,88 +1,135 @@
 package com.cozybinarybase.accountstopthestore.common.handler;
 
-import com.cozybinarybase.accountstopthestore.common.annotation.FailName;
-import com.cozybinarybase.accountstopthestore.common.dto.ApiResponse;
-import com.cozybinarybase.accountstopthestore.common.dto.FailDetailDto;
-import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberMismatchException;
-import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotFoundException;
-import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotFoundException;
+import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
+import com.cozybinarybase.accountstopthestore.model.accountbook.exception.AccountBookNotValidException;
+import com.cozybinarybase.accountstopthestore.model.asset.exception.AssetNotValidException;
+import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotValidException;
+import com.cozybinarybase.accountstopthestore.model.images.exception.FileIsNotValidImageException;
+import com.cozybinarybase.accountstopthestore.model.images.exception.ImageNotValidException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  @ResponseStatus(HttpStatus.FORBIDDEN)
-  @ExceptionHandler(MemberMismatchException.class)
-  public ApiResponse<FailDetailDto> memberMismatchException(MemberMismatchException e) {
+  @ExceptionHandler(MemberNotValidException.class)
+  public ResponseEntity<?> handleMemberNotValidException(MemberNotValidException e) {
     log.error(e.getMessage());
 
-    FailDetailDto failDetail = new FailDetailDto();
-    failDetail.nestedError("member").addFieldError("memberId", e.getMessage());
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
 
-    return ApiResponse.fail(failDetail);
+    return ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .body(errorDetails);
   }
 
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ExceptionHandler(MemberNotFoundException.class)
-  public ApiResponse<FailDetailDto> memberNotFoundException(MemberNotFoundException e) {
+  @ExceptionHandler(AssetNotValidException.class)
+  public ResponseEntity<?> handleAssetNotValidException(AssetNotValidException e) {
     log.error(e.getMessage());
 
-    FailDetailDto failDetail = new FailDetailDto();
-    failDetail.nestedError("member").addFieldError("memberId", e.getMessage());
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
 
-    return ApiResponse.fail(failDetail);
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
   }
 
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ExceptionHandler(AssetNotFoundException.class)
-  public ResponseEntity<ApiResponse<?>> assetNotFoundException(AssetNotFoundException e) {
+  @ExceptionHandler(CategoryNotValidException.class)
+  public ResponseEntity<?> handleCategoryNotValidException(CategoryNotValidException e) {
     log.error(e.getMessage());
 
-    FailDetailDto failDetail = new FailDetailDto();
-    failDetail.addFieldError("assetId", e.getMessage());
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
 
-    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(ApiResponse.fail(Map.of("asset", failDetail.getErrors())));
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
   }
 
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(AccountBookNotValidException.class)
+  public ResponseEntity<?> handleAccountBookNotValidException(AccountBookNotValidException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
+
+  @ExceptionHandler(ImageNotValidException.class)
+  public ResponseEntity<?> handleImageNotValidException(ImageNotValidException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
+
+  @ExceptionHandler(FileIsNotValidImageException.class)
+  public ResponseEntity<?> handleFileIsNotValidImageException(FileIsNotValidImageException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<?>> handleValidationExceptions(
-      MethodArgumentNotValidException ex) {
-    BindingResult bindingResult = ex.getBindingResult();
-    Object target = bindingResult.getTarget();
+  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
+    log.error(e.getMessage());
 
-    FailName failNameAnnotation = target.getClass().getAnnotation(FailName.class);
-    String entityName;
-    if (failNameAnnotation != null) {
-      entityName = failNameAnnotation.value();
-    } else {
-      entityName = target.getClass().getSimpleName().toLowerCase();
-    }
+    Map<String, String> errors = e.getBindingResult().getFieldErrors()
+        .stream()
+        .collect(Collectors.toMap(
+            FieldError::getField,
+            FieldError::getDefaultMessage,
+            (existingValue, newValue) -> existingValue
+        ));
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errors);
+  }
 
-    FailDetailDto rootError = new FailDetailDto();
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
+    log.error(e.getMessage());
 
-    for (FieldError fieldError : bindingResult.getFieldErrors()) {
-      String[] fields = fieldError.getField().split("\\.");
-      FailDetailDto currentError = rootError;
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
 
-      for (int i = 0; i < fields.length - 1; i++) {
-        currentError = currentError.nestedError(fields[i]);
-      }
-      currentError.addFieldError(fields[fields.length - 1], fieldError.getDefaultMessage());
-    }
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
 
-    return ResponseEntity.badRequest()
-        .body(ApiResponse.fail(Map.of(entityName, rootError.getErrors())));
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<?> handleRuntimeException(RuntimeException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", (e.getMessage() != null) ? e.getMessage() : "내부 서버 에러");
+
+    return ResponseEntity
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(errorDetails);
   }
 }

@@ -1,6 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.member.domain;
 
-import com.cozybinarybase.accountstopthestore.model.member.dto.MemberSignUpRequest;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.AuthType;
 import com.cozybinarybase.accountstopthestore.model.member.dto.constants.Authority;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
@@ -47,7 +47,7 @@ public class Member implements UserDetails {
 
   private LocalDateTime withdrawalAt;
 
-  public static Member fromSignUpDto(MemberSignUpRequest memberSignUpRequest) {
+  public static Member fromSignUpDto(EmailSignUpRequestDto memberSignUpRequest) {
     return Member.builder()
         .authType(AuthType.EMAIL)
         .email(memberSignUpRequest.getEmail())
@@ -75,7 +75,6 @@ public class Member implements UserDetails {
     this.role = Authority.USER;
   }
 
-  // 비밀번호 암호화 메소드
   public void passwordEncode(PasswordEncoder passwordEncoder) {
     this.password = passwordEncoder.encode(this.password);
   }

@@ -26,11 +26,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     this.tokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
   }
 
-  private void loginSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User) throws IOException {
-    String accessToken = tokenProvider.generateAccessToken(customOAuth2User);
-    String refreshToken = tokenProvider.generateRefreshToken();
-
-    tokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
-    tokenProvider.updateRefreshToken(customOAuth2User.getEmail(), refreshToken);
-  }
+//  private void loginSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User) throws IOException {
+//    String accessToken = tokenProvider.generateAccessToken(customOAuth2User);
+//    String refreshToken = tokenProvider.generateRefreshToken();
+//
+//    tokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+//    tokenProvider.updateRefreshToken(customOAuth2User.getEmail(), refreshToken);
+//  }
 }

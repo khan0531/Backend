@@ -1,16 +1,23 @@
+app:
+  domainUrl: http://localhost:8080
+
 spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
   datasource:
-    url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-    h2:
-      console:
-        enabled: true
+#    url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+#    username: sa
+#    password:
+#    driver-class-name: org.h2.Driver
+#    h2:
+#      console:
+#        enabled: true
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/demo
+    username: root
+    password: ${MYSQL_PASSWORD:7845120qwe}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -24,6 +31,16 @@ spring:
             scope:
               - profile
               - email
+  devtools:
+    restart:
+      enabled: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
 
 jwt:
   secretKey: SeCrEtKeY4HaShInG
@@ -31,3 +48,8 @@ jwt:
     expiration: 3600000
   refresh:
     expiration: 1209600000
+
+azure:
+  ocr:
+    endpoint: ${AZURE_OCR_ENDPOINT:azure_ocr_endpoint}
+    key: ${AZURE_OCR_KEY:azure_ocr_key}

@@ -13,11 +13,13 @@ import lombok.NoArgsConstructor;
 public class CategoryUpdateResponseDto {
 
   private Long id;
+  private String categoryType;
   private String categoryName;
 
   public static CategoryUpdateResponseDto fromEntity(CategoryEntity categoryEntity) {
     return CategoryUpdateResponseDto.builder()
         .id(categoryEntity.getId())
+        .categoryType(categoryEntity.getType().getValue())
         .categoryName(categoryEntity.getName())
         .build();
   }

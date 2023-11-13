@@ -1,15 +1,17 @@
 package com.cozybinarybase.accountstopthestore.model.category.service;
 
-import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryDeleteResponseDto;
+import com.cozybinarybase.accountstopthestore.model.category.domain.Category;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategorySaveResponseDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateRequestDto;
 import com.cozybinarybase.accountstopthestore.model.category.dto.CategoryUpdateResponseDto;
+import com.cozybinarybase.accountstopthestore.model.category.dto.constants.CategoryType;
+import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotValidException;
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
-import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
-import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
+import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -20,20 +22,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CategoryService {
 
-  private final MemberRepository memberRepository;
   private final CategoryRepository categoryRepository;
+  private final MemberService memberService;
+  private final Category category;
 
   @Transactional
-  public CategorySaveResponseDto saveCategory(CategorySaveRequestDto requestDto, Long memberId) {
-    MemberEntity memberEntity = memberRepository.findById(memberId).orElseThrow(
-        () -> new RuntimeException("찾을 수 없는 회원 번호입니다.")
-    );
+  public CategorySaveResponseDto saveCategory(
+      CategorySaveRequestDto requestDto, Member member
+  ) {
+    memberService.validateAndGetMember(member);
 
-    CategoryEntity categoryEntity = categoryRepository.save(CategoryEntity.builder()
-        .name(requestDto.getCategoryName())
-        .member(memberEntity)
-        .build());
+    existCategoryOfMember(
+        requestDto.getCategoryName(), requestDto.getCategoryType(), member.getId());
 
+    CategoryEntity categoryEntity =
+        categoryRepository.save(category.createCategory(requestDto, member.getId()).toEntity());
     return CategorySaveResponseDto.fromEntity(categoryEntity);
   }
 
@@ -41,59 +44,54 @@ public class CategoryService {
   public CategoryUpdateResponseDto updateCategory(
       Long categoryId,
       CategoryUpdateRequestDto requestDto,
-      Long memberId
+      Member member
   ) {
-    if (memberRepository.findById(memberId).isEmpty()) {
-      throw new RuntimeException("찾을 수 없는 회원 번호입니다.");
-    }
+    memberService.validateAndGetMember(member);
 
     CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(
-        () -> new RuntimeException("찾을 수 없는 카테고리 번호입니다.")
+        CategoryNotValidException::new
     );
 
-    categoryEntity.update(requestDto.getCategoryName());
+    existCategoryOfMember(
+        requestDto.getCategoryName(), requestDto.getCategoryType(), member.getId());
 
-    return CategoryUpdateResponseDto.fromEntity(categoryEntity);
+    Category categoryDomain = Category.fromEntity(categoryEntity);
+    categoryDomain.updateCategory(requestDto);
+
+    CategoryEntity updateCategoryEntity = categoryDomain.toEntity();
+    categoryRepository.save(updateCategoryEntity);
+
+    return CategoryUpdateResponseDto.fromEntity(updateCategoryEntity);
   }
 
   @Transactional
-  public CategoryDeleteResponseDto deleteCategory(Long categoryId, Long memberId) {
-    if (memberRepository.findById(memberId).isEmpty()) {
-      throw new RuntimeException("찾을 수 없는 회원 번호입니다.");
-    }
+  public void deleteCategory(Long categoryId, Member member) {
+    memberService.validateAndGetMember(member);
+
     CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(
-        () -> new RuntimeException("찾을 수 없는 카테고리 번호입니다.")
+        CategoryNotValidException::new
     );
 
     categoryRepository.delete(categoryEntity);
-
-    return CategoryDeleteResponseDto.builder()
-        .categoryId(categoryId)
-        .build();
   }
 
   @Transactional(readOnly = true)
-  public CategoryResponseDto getCategory(Long categoryId, Long memberId) {
-    if (memberRepository.findById(memberId).isEmpty()) {
-      throw new RuntimeException("찾을 수 없는 회원 번호입니다.");
-    }
-    CategoryEntity categoryEntity = categoryRepository.findById(categoryId).orElseThrow(
-        () -> new RuntimeException("찾을 수 없는 카테고리 번호입니다.")
-    );
+  public List<CategoryResponseDto> allCategory(Member member) {
+    memberService.validateAndGetMember(member);
 
-    return CategoryResponseDto.fromEntity(categoryEntity);
-  }
-
-  @Transactional(readOnly = true)
-  public List<CategoryResponseDto> allCategory(Long memberId) {
-    if (memberRepository.findById(memberId).isEmpty()) {
-      throw new RuntimeException("찾을 수 없는 회원 번호입니다.");
-    }
-
-    List<CategoryEntity> categoryEntityList = categoryRepository.findByMember_Id(memberId);
+    List<CategoryEntity> categoryEntityList = categoryRepository.findByMember_Id(member.getId());
 
     return categoryEntityList.stream()
         .map(CategoryResponseDto::fromEntity)
         .collect(Collectors.toList());
+  }
+
+  private void existCategoryOfMember(String categoryName, CategoryType categoryType,
+      Long memberId) {
+    if (categoryRepository.existsByNameAndTypeAndMember_Id(
+        categoryName, categoryType, memberId)
+    ) {
+      throw new CategoryNotValidException("이미 존재하는 카테고리입니다.");
+    }
   }
 }

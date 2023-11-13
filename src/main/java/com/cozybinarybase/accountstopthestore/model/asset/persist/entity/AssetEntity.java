@@ -48,6 +48,12 @@ public class AssetEntity {
   @Column(name = "amount")
   private Long amount;
 
+  @Column(name = "statementDay")
+  private Integer statementDay;
+
+  @Column(name = "dueDay")
+  private Integer dueDay;
+
   @Column(name = "memo", columnDefinition = "TEXT")
   private String memo;
 
@@ -62,4 +68,5 @@ public class AssetEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member")
   private MemberEntity member;
+
 }

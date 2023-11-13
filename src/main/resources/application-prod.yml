@@ -1,0 +1,57 @@
+server:
+  port: 8443
+  ssl:
+    key-store: ${SSL_KEYSTORE_PATH}
+    key-store-password: ${SSL_KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: ${SSL_KEYSTORE_ALIAS}
+
+logging:
+  level:
+    root: INFO
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/demo
+    username: root
+    password: ${MYSQL_PASSWORD:7845120qwe}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+            scope:
+              - profile
+              - email
+  devtools:
+    restart:
+      enabled: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+
+jwt:
+  secretKey: SeCrEtKeY4HaShInG
+  access:
+    expiration: 3600000
+  refresh:
+    expiration: 1209600000
+
+azure:
+  ocr:
+    endpoint: ${AZURE_OCR_ENDPOINT:azure_ocr_endpoint}
+    key: ${AZURE_OCR_KEY:azure_ocr_key}

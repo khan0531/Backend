@@ -1,0 +1,15 @@
+package com.cozybinarybase.accountstopthestore.model.accountbook.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Getter
+public class StatisticsData {
+  private String category;
+  private Long value;
+}
