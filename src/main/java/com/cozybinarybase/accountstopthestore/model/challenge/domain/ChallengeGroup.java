@@ -32,6 +32,10 @@ public class ChallengeGroup {
 
   private Long adminId;
 
+  private String inviteLink;
+
+  private LocalDateTime linkExpiredAt;
+
   public static ChallengeGroup fromRequest(ChallengeGroupRequestDto groupRequest, Member member) {
     return ChallengeGroup.builder()
         .name(groupRequest.getName())
@@ -57,6 +61,11 @@ public class ChallengeGroup {
         .build();
   }
 
+  //링크 만료 되면 true
+  public boolean isLinkExpired() {
+    return linkExpiredAt.isBefore(LocalDateTime.now());
+  }
+
   public ChallengeGroupEntity toEntity() {
     return ChallengeGroupEntity.builder()
         .id(id)
@@ -68,5 +77,37 @@ public class ChallengeGroup {
         .endAt(endAt)
         .admin(MemberEntity.builder().id(adminId).build())
         .build();
+  }
+
+  public boolean isAdmin(Member member) {
+    return adminId.equals(member.getId());
+  }
+
+  public ChallengeGroup update(ChallengeGroupRequestDto challengeGroupRequestDto) {
+    if (challengeGroupRequestDto.getName() != null) {
+      this.name = challengeGroupRequestDto.getName();
+    }
+    if (challengeGroupRequestDto.getDescription() != null) {
+      this.description = challengeGroupRequestDto.getDescription();
+    }
+    if (challengeGroupRequestDto.getTargetAmount() != null) {
+      this.targetAmount = challengeGroupRequestDto.getTargetAmount();
+    }
+    if (challengeGroupRequestDto.getMaxMembers() != null) {
+      this.maxMembers = challengeGroupRequestDto.getMaxMembers();
+    }
+    if (challengeGroupRequestDto.getStartAt() != null) {
+      this.startAt = challengeGroupRequestDto.getStartAt();
+    }
+    if (challengeGroupRequestDto.getEndAt() != null) {
+      this.endAt = challengeGroupRequestDto.getEndAt();
+    }
+    return this;
+  }
+
+  public ChallengeGroup updateInviteLink(String inviteLink) {
+    this.inviteLink = inviteLink;
+    this.linkExpiredAt = LocalDateTime.now().plusMinutes(30);
+    return this;
   }
 }

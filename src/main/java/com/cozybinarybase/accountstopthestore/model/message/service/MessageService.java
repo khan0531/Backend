@@ -9,6 +9,7 @@ import com.cozybinarybase.accountstopthestore.model.message.persist.entity.Messa
 import com.cozybinarybase.accountstopthestore.model.message.persist.repository.MessageRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,9 +19,11 @@ public class MessageService {
   private final MessageRepository messageRepository;
   private final MemberGroupRepository memberGroupRepository;
   private final ChallengeGroupRepository challengeGroupRepository;
+  private final SimpMessagingTemplate messagingTemplate;
 
-  public void save(Message message) {
+  public void saveAndSend(Message message) {
     messageRepository.save(message.toEntity());
+    messagingTemplate.convertAndSend("/chat/group/" + message.getGroupId(), message);
   }
 
   public List<Message> getMessages(Long groupId, Member member) {
@@ -30,7 +33,7 @@ public class MessageService {
     if (!memberGroupRepository.existsByMemberAndChallengeGroup(member.toEntity(), challengeGroupEntity)) {
       throw new IllegalArgumentException("그룹에 속해 있지 않습니다.");
     }
-    List<MessageEntity> messageEntities = messageRepository.findByChallengeGroup(challengeGroupEntity);
+    List<MessageEntity> messageEntities = messageRepository.findByGroup(challengeGroupEntity);
     return Message.fromEntities(messageEntities);
   }
 }

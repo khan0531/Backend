@@ -1,6 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.challenge.controller;
 
 import com.cozybinarybase.accountstopthestore.model.challenge.dto.ChallengeGroupRequestDto;
+import com.cozybinarybase.accountstopthestore.model.challenge.dto.SavingMoneyRequestDto;
 import com.cozybinarybase.accountstopthestore.model.challenge.service.ChallengeGroupService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -10,13 +11,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/group")
+@RequestMapping("/groups")
 public class ChallengeGroupController {
 
   private final ChallengeGroupService challengeGroupService;
@@ -24,19 +26,39 @@ public class ChallengeGroupController {
   @PostMapping
   public ResponseEntity<?> createGroup(@RequestBody ChallengeGroupRequestDto challengeGroupRequestDto,
       @AuthenticationPrincipal Member member) {
-    challengeGroupService.createGroup(challengeGroupRequestDto, member);
-    return null;
+    return ResponseEntity.ok(challengeGroupService.createChallengeGroup(challengeGroupRequestDto, member));
   }
 
-  @GetMapping("/{groupId}/create-invite-link")
-  public ResponseEntity<String> createInviteLink(@PathVariable Long groupId, @AuthenticationPrincipal Member member) {
-    String inviteLink = challengeGroupService.createInviteLink(groupId, member);
-    return ResponseEntity.ok(inviteLink);
+  @GetMapping
+  public ResponseEntity<?> getGroups(@AuthenticationPrincipal Member member) {
+    return ResponseEntity.ok(challengeGroupService.getChallengeGroups(member));
+  }
+
+  @PutMapping("/{groupId}")
+  public ResponseEntity<?> updateGroup(@PathVariable Long groupId,
+      @RequestBody ChallengeGroupRequestDto challengeGroupRequestDto, @AuthenticationPrincipal Member member) {
+    return ResponseEntity.ok(challengeGroupService.updateChallengeGroup(groupId, challengeGroupRequestDto, member));
+  }
+
+  @DeleteMapping("/{groupId}")
+  public ResponseEntity<?> deleteGroup(@PathVariable Long groupId, @AuthenticationPrincipal Member member) {
+    return ResponseEntity.ok(challengeGroupService.deleteChallengeGroup(groupId, member));
+  }
+
+  @PostMapping("/{groupID}/saving")
+  public ResponseEntity<?> saveMoney(@PathVariable Long groupId,
+      @RequestBody SavingMoneyRequestDto savingMoneyRequestDto, @AuthenticationPrincipal Member member) {
+    return ResponseEntity.ok(challengeGroupService.saveMoney(groupId, savingMoneyRequestDto, member));
+  }
+
+  @GetMapping("/{groupId}/invite-link")
+  public ResponseEntity<?> createInviteLink(@PathVariable Long groupId, @AuthenticationPrincipal Member member) {
+    return ResponseEntity.ok(challengeGroupService.createInviteLink(groupId, member));
   }
 
   @PostMapping("/join/{inviteLink}")
   public ResponseEntity<?> joinGroup(@PathVariable String inviteLink, @AuthenticationPrincipal Member member) {
-    challengeGroupService.joinGroup(inviteLink, member);
+    challengeGroupService.joinChallengeGroup(inviteLink, member);
     return ResponseEntity.ok().build();
   }
 
@@ -44,7 +66,7 @@ public class ChallengeGroupController {
   @DeleteMapping("/{groupId}/member/{memberId}")
   public ResponseEntity<?> leaveGroup(@PathVariable Long groupId, @PathVariable Long memberId,
       @AuthenticationPrincipal Member member) {
-    challengeGroupService.leaveGroup(groupId, memberId, member);
+    challengeGroupService.leaveChallengeGroup(groupId, memberId, member);
     return ResponseEntity.ok().build();
   }
 

@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
-  List<MessageEntity> findByChallengeGroup(ChallengeGroupEntity challengeGroupEntity);
+  List<MessageEntity> findByGroup(ChallengeGroupEntity challengeGroupEntity);
 }

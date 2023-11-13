@@ -39,6 +39,8 @@ public class ChallengeGroupEntity extends BaseTimeEntity {
   @ManyToOne
   private MemberEntity admin;
 
-//  @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
-//  private List<MessageEntity> messageList = new ArrayList<>();
+  private String inviteLink;
+
+  private LocalDateTime linkExpiredAt;
+
 }

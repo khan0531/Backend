@@ -1,6 +1,8 @@
 package com.cozybinarybase.accountstopthestore.model.message.domain;
 
+import com.cozybinarybase.accountstopthestore.model.challenge.domain.ChallengeGroup;
 import com.cozybinarybase.accountstopthestore.model.challenge.persist.entity.ChallengeGroupEntity;
+import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.message.dto.constants.MessageType;
 import com.cozybinarybase.accountstopthestore.model.message.persist.entity.MessageEntity;
@@ -38,20 +40,20 @@ public class Message {
         .toList();
   }
 
-  public static Message createEnterMessage(Long groupId, Long senderId) {
+  public static Message createEnterMessage(ChallengeGroup group, Member sender) {
     return Message.builder()
-        .groupId(groupId)
-        .senderId(senderId)
-        .message(MemberEntity.builder().id(senderId).build().getName() + "님이 입장하셨습니다.")
+        .groupId(group.getId())
+        .senderId(sender.getId())
+        .message(sender.getName() + "님이 입장하셨습니다.")
         .messageType(MessageType.ENTER)
         .build();
   }
 
-  public static Message createLeaveMessage(Long groupId, Long senderId) {
+  public static Message createLeaveMessage(ChallengeGroup group, Member sender) {
     return Message.builder()
-        .groupId(groupId)
-        .senderId(senderId)
-        .message(MemberEntity.builder().id(senderId).build().getName() + "님이 퇴장하셨습니다.")
+        .groupId(group.getId())
+        .senderId(sender.getId())
+        .message(sender.getName() + "님이 퇴장하셨습니다.")
         .messageType(MessageType.LEAVE)
         .build();
   }
