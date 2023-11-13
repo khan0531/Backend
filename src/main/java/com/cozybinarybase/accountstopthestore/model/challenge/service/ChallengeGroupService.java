@@ -97,7 +97,7 @@ public class ChallengeGroupService {
     messageService.saveAndSend(leaveMessage);
   }
 
-  private boolean isChallengeGroupMember(ChallengeGroup challengeGroup, Member member) {
+  public boolean isChallengeGroupMember(ChallengeGroup challengeGroup, Member member) {
     if (challengeGroup.isAdmin(member)) {
       return true;
     }
