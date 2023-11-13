@@ -94,8 +94,10 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-    Map<String, String> errors = ex.getBindingResult().getFieldErrors()
+  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errors = e.getBindingResult().getFieldErrors()
         .stream()
         .collect(Collectors.toMap(
             FieldError::getField,
@@ -121,7 +123,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(RuntimeException.class)
   public ResponseEntity<?> handleRuntimeException(RuntimeException e) {
-    log.error("에러 발생: {}", e.toString());
+    log.error(e.getMessage());
 
     Map<String, String> errorDetails = new HashMap<>();
     errorDetails.put("message", (e.getMessage() != null) ? e.getMessage() : "내부 서버 에러");
