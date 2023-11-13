@@ -19,7 +19,7 @@ public interface AccountBookRepository extends JpaRepository<AccountBookEntity, 
 
   Optional<AccountBookEntity> findByIdAndMember_Id(Long accountBookId, Long memberId);
 
-  Page<AccountBookEntity> findByCreatedAtBetweenAndTransactionTypeAndMember_Id(
+  Page<AccountBookEntity> findByTransactedAtBetweenAndTransactionTypeAndMember_Id(
       LocalDateTime startDate, LocalDateTime endDate, TransactionType transactionType,
       Long memberId, Pageable pageable);
 
