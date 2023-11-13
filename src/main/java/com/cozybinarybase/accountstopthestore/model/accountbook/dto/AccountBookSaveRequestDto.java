@@ -37,5 +37,7 @@ public class AccountBookSaveRequestDto {
   private String address;
   private String memo;
   private RecurringType recurringType;
+
+  @NotNull(message = "정기결제(할부) 여부를 입력해주시길 바랍니다.")
   private Boolean isInstallment;
 }

@@ -1,5 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,4 +18,3 @@ public enum TransactionType {
     return this.value;
   }
 }
-

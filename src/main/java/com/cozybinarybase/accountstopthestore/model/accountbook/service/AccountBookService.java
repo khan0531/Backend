@@ -132,23 +132,20 @@ public class AccountBookService {
   }
 
   @Transactional(readOnly = true)
-  public List<AccountBookResponseDto> getAccountBooks(LocalDateTime startDateTime, LocalDateTime endDateTime,
+  public List<AccountBookResponseDto> getAccountBooks(LocalDate startDate, LocalDate endDate,
       TransactionType transactionType, int page, int limit, Member member) {
     memberService.validateAndGetMember(member);
 
-    startDateTime = startDateTime.toLocalDate().atStartOfDay();
-    endDateTime = endDateTime.toLocalDate().atTime(LocalTime.MAX);
-
-    if (startDateTime.isAfter(endDateTime)) {
+    if (startDate.isAfter(endDate) || endDate.isBefore(startDate)) {
       throw new AccountBookNotValidException("날짜 설정을 다시 해주시길 바랍니다.");
     }
 
     Pageable pageable = PageRequest.of(page, limit);
 
     List<AccountBookEntity> accountBookEntityList =
-        accountBookRepository.findByCreatedAtBetweenAndTransactionTypeAndMember_Id(
-            startDateTime,
-            endDateTime,
+        accountBookRepository.findByTransactedAtBetweenAndTransactionTypeAndMember_Id(
+            startDate.atStartOfDay(),
+            endDate.plusDays(1).atStartOfDay(),
             transactionType,
             member.getId(),
             pageable).getContent();
