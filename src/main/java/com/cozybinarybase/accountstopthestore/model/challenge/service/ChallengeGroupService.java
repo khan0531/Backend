@@ -7,6 +7,7 @@ import com.cozybinarybase.accountstopthestore.model.challenge.dto.ChallengeGroup
 import com.cozybinarybase.accountstopthestore.model.challenge.dto.InviteLinkResponseDto;
 import com.cozybinarybase.accountstopthestore.model.challenge.dto.MemberGroupResponseDto;
 import com.cozybinarybase.accountstopthestore.model.challenge.dto.SavingMoneyRequestDto;
+import com.cozybinarybase.accountstopthestore.model.challenge.persist.entity.ChallengeGroupEntity;
 import com.cozybinarybase.accountstopthestore.model.challenge.persist.repository.ChallengeGroupRepository;
 import com.cozybinarybase.accountstopthestore.model.challenge.persist.repository.MemberGroupRepository;
 import com.cozybinarybase.accountstopthestore.model.challenge.security.RandomStringGenerator;
@@ -14,9 +15,10 @@ import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.model.message.domain.Message;
+import com.cozybinarybase.accountstopthestore.model.message.persist.entity.MessageEntity;
+import com.cozybinarybase.accountstopthestore.model.message.persist.repository.MessageRepository;
 import com.cozybinarybase.accountstopthestore.model.message.service.MessageService;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ public class ChallengeGroupService {
   private final ChallengeGroupRepository challengeGroupRepository;
   private final MemberGroupRepository memberGroupRepository;
   private final MemberRepository memberRepository;
+  private final MessageRepository messageRepository;
   private final MessageService messageService;
 
   public InviteLinkResponseDto createInviteLink(Long groupId, Member member) {
@@ -38,7 +41,7 @@ public class ChallengeGroupService {
       throw new IllegalArgumentException("그룹에 속해 있지 않습니다.");
     }
 
-    if (challengeGroup.getInviteLink() != null && !challengeGroup.isLinkExpired()) {
+    if (challengeGroup.isLinkValid()) {
       return InviteLinkResponseDto.fromEntity(challengeGroup.toEntity());
     }
 
@@ -75,18 +78,18 @@ public class ChallengeGroupService {
     return ChallengeGroupResponseDto.fromEntity(challengeGroup.toEntity());
   }
 
-  public void leaveChallengeGroup(Long groupId, Long memberId, Member member) {
+  public void leaveChallengeGroup(Long groupId, Long leaveMemberId, Member member) {
     ChallengeGroup challengeGroup = challengeGroupRepository.findById(groupId)
         .map(ChallengeGroup::fromEntity)
         .orElseThrow(() -> new IllegalArgumentException("그룹이 존재하지 않습니다."));
 
     if (challengeGroup.isAdmin(member)) {
-      MemberEntity memberEntity = memberRepository.findById(memberId)
+      MemberEntity leaveMember = memberRepository.findById(leaveMemberId)
           .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
 
-      memberGroupRepository.findByMemberAndChallengeGroup(memberEntity, challengeGroup.toEntity())
+      memberGroupRepository.findByMemberAndChallengeGroup(leaveMember, challengeGroup.toEntity())
           .ifPresent(memberGroupRepository::delete);
-    } else if (memberId.equals(member.getId())) {
+    } else if (leaveMemberId.equals(member.getId())) {
       memberGroupRepository.findByMemberAndChallengeGroup(member.toEntity(), challengeGroup.toEntity())
           .ifPresent(memberGroupRepository::delete);
     } else {
@@ -105,11 +108,12 @@ public class ChallengeGroupService {
     List<Long> memberIds = memberGroupRepository.findByChallengeGroup(challengeGroup.toEntity())
         .stream()
         .map(memberGroup -> memberGroup.getMember().getId())
-        .collect(Collectors.toList());
+        .toList();
 
     return memberIds.contains(member.getId());
   }
 
+  //TODO
   public List<ChallengeGroupResponseDto> getChallengeGroups(Member member) {
     return null;
   }
@@ -147,10 +151,6 @@ public class ChallengeGroupService {
         .map(ChallengeGroup::fromEntity)
         .orElseThrow(() -> new IllegalArgumentException("그룹이 존재하지 않습니다."));
 
-    if (!isChallengeGroupMember(challengeGroup, member)) {
-      throw new IllegalArgumentException("그룹에 속해 있지 않습니다.");
-    }
-
     MemberGroup memberGroup = memberGroupRepository.findByMemberAndChallengeGroup(member.toEntity(),
             challengeGroup.toEntity())
         .map(MemberGroup::fromEntity)
@@ -159,5 +159,16 @@ public class ChallengeGroupService {
     memberGroupRepository.save(memberGroup.updateSavedAmount(savingMoneyRequestDto).toEntity());
 
     return MemberGroupResponseDto.fromEntity(memberGroup.toEntity());
+  }
+
+  public List<Message> getMessages(Long groupId, Member member) {
+    ChallengeGroupEntity challengeGroupEntity = challengeGroupRepository.findById(groupId)
+        .orElseThrow(() -> new IllegalArgumentException("그룹이 존재하지 않습니다."));
+
+    if (!isChallengeGroupMember(ChallengeGroup.fromEntity(challengeGroupEntity), member)) {
+      throw new IllegalArgumentException("그룹에 속해 있지 않습니다.");
+    }
+    List<MessageEntity> messageEntities = messageRepository.findByGroup(challengeGroupEntity);
+    return Message.fromEntities(messageEntities);
   }
 }

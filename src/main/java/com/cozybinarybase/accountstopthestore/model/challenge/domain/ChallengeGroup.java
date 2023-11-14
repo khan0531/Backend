@@ -61,9 +61,8 @@ public class ChallengeGroup {
         .build();
   }
 
-  //링크 만료 되면 true
-  public boolean isLinkExpired() {
-    return linkExpiredAt.isBefore(LocalDateTime.now());
+  public boolean isLinkValid() {
+    return inviteLink != null && linkExpiredAt.isAfter(LocalDateTime.now());
   }
 
   public ChallengeGroupEntity toEntity() {
