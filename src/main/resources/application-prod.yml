@@ -16,7 +16,7 @@ spring:
       ddl-auto: update
     show-sql: true
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/demo
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
     password: ${MYSQL_PASSWORD:7845120qwe}
     driver-class-name: com.mysql.cj.jdbc.Driver
