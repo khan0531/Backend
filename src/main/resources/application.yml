@@ -1,5 +1,5 @@
 app:
-  domainUrl: http://localhost:8080
+  domainUrl: ${ASTS_DOMAIN_URL:http://localhost:8080}
 
 spring:
   profiles:

@@ -13,7 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "group")
+@Entity(name = "challenge_group")
 @Data
 @Builder
 @AllArgsConstructor
