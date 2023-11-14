@@ -2,8 +2,10 @@ package com.cozybinarybase.accountstopthestore.model.challenge.persist.entity;
 
 import com.cozybinarybase.accountstopthestore.BaseTimeEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -32,11 +34,11 @@ public class ChallengeGroupEntity extends BaseTimeEntity {
 
   private Long maxMembers;
 
-  private LocalDateTime startAt;
+  private LocalDate startAt;
 
-  private LocalDateTime endAt;
+  private LocalDate endAt;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private MemberEntity admin;
 
   private String inviteLink;
