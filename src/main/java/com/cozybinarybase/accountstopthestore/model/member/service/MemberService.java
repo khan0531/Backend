@@ -5,6 +5,7 @@ import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.repository.AccountBookRepository;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
+import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
 import com.cozybinarybase.accountstopthestore.model.images.persist.repository.ImageRepository;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
@@ -21,15 +22,16 @@ import com.cozybinarybase.accountstopthestore.model.member.persist.repository.Pa
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.VerificationCodeRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.util.MemberUtil;
 import com.cozybinarybase.accountstopthestore.security.TokenProvider;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -59,6 +61,13 @@ public class MemberService implements UserDetailsService {
 
   @Value("${spring.profiles.active}")
   private String activeProfile;
+
+  private final static String[] categoryNames = {
+      "가전/가구", "가전생활/서비스", "교육/학원", "미용",
+      "스포츠/문화/레저", "여행/교통", "요식/유흥", "유통",
+      "음/식료품", "의료", "의류/잡화", "자동차",
+      "전자상거래", "주유"
+  };
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -91,6 +100,17 @@ public class MemberService implements UserDetailsService {
     Member member = Member.fromSignUpDto(memberSignUpRequest);
     member.passwordEncode(this.passwordEncoder);
     MemberEntity memberEntity = this.memberRepository.save(member.toEntity());
+
+
+
+    List<CategoryEntity> categories = Arrays.stream(categoryNames)
+        .map(categoryName -> CategoryEntity.builder()
+            .member(memberEntity)
+            .name(categoryName)
+            .build())
+        .collect(Collectors.toList());
+
+    categoryRepository.saveAll(categories);
 
     return EmailSignUpResponseDto.fromEntity(memberEntity);
   }
