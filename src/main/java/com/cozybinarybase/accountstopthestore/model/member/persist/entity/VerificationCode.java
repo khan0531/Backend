@@ -9,7 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
-@RedisHash(value = "VerificationCode", timeToLive = 60)
+@RedisHash(value = "VerificationCode", timeToLive = 300)
 @Builder
 @Data
 @AllArgsConstructor
