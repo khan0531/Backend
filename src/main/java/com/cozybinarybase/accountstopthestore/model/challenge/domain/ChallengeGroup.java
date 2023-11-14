@@ -4,6 +4,7 @@ import com.cozybinarybase.accountstopthestore.model.challenge.dto.ChallengeGroup
 import com.cozybinarybase.accountstopthestore.model.challenge.persist.entity.ChallengeGroupEntity;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,9 +27,9 @@ public class ChallengeGroup {
 
   private Long maxMembers;
 
-  private LocalDateTime startAt;
+  private LocalDate startAt;
 
-  private LocalDateTime endAt;
+  private LocalDate endAt;
 
   private Long adminId;
 
@@ -58,6 +59,8 @@ public class ChallengeGroup {
         .startAt(challengeGroupEntity.getStartAt())
         .endAt(challengeGroupEntity.getEndAt())
         .adminId(challengeGroupEntity.getAdmin().getId())
+        .inviteLink(challengeGroupEntity.getInviteLink())
+        .linkExpiredAt(challengeGroupEntity.getLinkExpiredAt())
         .build();
   }
 
@@ -75,6 +78,8 @@ public class ChallengeGroup {
         .startAt(startAt)
         .endAt(endAt)
         .admin(MemberEntity.builder().id(adminId).build())
+        .inviteLink(inviteLink)
+        .linkExpiredAt(linkExpiredAt)
         .build();
   }
 

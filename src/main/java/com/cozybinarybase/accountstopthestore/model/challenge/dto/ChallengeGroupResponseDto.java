@@ -1,7 +1,7 @@
 package com.cozybinarybase.accountstopthestore.model.challenge.dto;
 
 import com.cozybinarybase.accountstopthestore.model.challenge.persist.entity.ChallengeGroupEntity;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +11,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class ChallengeGroupResponseDto {
 
+  private Long id;
+
   private String name;
 
   private String description;
@@ -19,21 +21,22 @@ public class ChallengeGroupResponseDto {
 
   private Long maxMembers;
 
-  private LocalDateTime startAt;
+  private LocalDate startAt;
 
-  private LocalDateTime endAt;
+  private LocalDate endAt;
 
-  private String adminEmail;
+  private Long adminId;
 
   public static ChallengeGroupResponseDto fromEntity(ChallengeGroupEntity challengeGroupEntity) {
     return ChallengeGroupResponseDto.builder()
+        .id(challengeGroupEntity.getId())
         .name(challengeGroupEntity.getName())
         .description(challengeGroupEntity.getDescription())
         .targetAmount(challengeGroupEntity.getTargetAmount())
         .maxMembers(challengeGroupEntity.getMaxMembers())
         .startAt(challengeGroupEntity.getStartAt())
         .endAt(challengeGroupEntity.getEndAt())
-        .adminEmail(challengeGroupEntity.getAdmin().getEmail())
+        .adminId(challengeGroupEntity.getAdmin().getId())
         .build();
   }
 }
