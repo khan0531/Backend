@@ -32,6 +32,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class AccountBookService {
+
+  @Value("${app.domainUrl}")
+  private String domainUrl;
 
   private final AccountBookRepository accountBookRepository;
   private final CategoryRepository categoryRepository;
@@ -209,12 +213,12 @@ public class AccountBookService {
         .map(originalImage -> {
           String compressedImageUrl = imageRepository.findByOriginalImage_ImageIdAndImageType(
                   originalImage.getImageId(), ImageEntity.ImageType.COMPRESSED)
-              .map(img -> "http://localhost:8080/images/" + img.getImageFileName())
+              .map(img -> domainUrl + "/images/" + img.getImageFileName())
               .orElse(null);
 
           String thumbnailUrl = imageRepository.findByOriginalImage_ImageIdAndImageType(
                   originalImage.getImageId(), ImageEntity.ImageType.THUMBNAIL)
-              .map(img -> "http://localhost:8080/images/" + img.getImageFileName())
+              .map(img -> domainUrl + "/images/" + img.getImageFileName())
               .orElse(null);
 
           return new AccountBookImageResponseDto(originalImage.getImageId(), compressedImageUrl, thumbnailUrl);
