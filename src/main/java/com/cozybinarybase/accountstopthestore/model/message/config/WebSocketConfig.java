@@ -17,19 +17,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
-    config.enableSimpleBroker("/chat/group");
+    config.enableSimpleBroker("/chat/groups/");
     config.setApplicationDestinationPrefixes("/app");
   }
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws")
-        .setAllowedOriginPatterns("*")
-        .withSockJS();
+        .setAllowedOriginPatterns("*");
+//        .withSockJS();
   }
 
   @Override
   public void configureClientInboundChannel(ChannelRegistration registration) {
-    registration.interceptors(stompHandler);
+//    registration.interceptors(stompHandler);
   }
 }

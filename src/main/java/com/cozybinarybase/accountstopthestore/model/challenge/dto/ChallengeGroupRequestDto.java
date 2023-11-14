@@ -1,6 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.challenge.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +16,7 @@ public class ChallengeGroupRequestDto {
 
   private Long maxMembers;
 
-  private LocalDateTime startAt;
+  private LocalDate startAt;
 
-  private LocalDateTime endAt;
+  private LocalDate endAt;
 }

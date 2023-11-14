@@ -47,16 +47,19 @@ public class ChallengeGroupService {
 
     int INVITE_LINK_LENGTH = 10;
     String inviteLink = RandomStringGenerator.generateRandomString(INVITE_LINK_LENGTH);
+    ChallengeGroupEntity challengeGroupEntity = challengeGroup.updateInviteLink(inviteLink).toEntity();
 
     return InviteLinkResponseDto.fromEntity(
-        challengeGroupRepository.save(challengeGroup.updateInviteLink(inviteLink).toEntity()));
+        challengeGroupRepository.save(challengeGroupEntity));
   }
 
   public ChallengeGroupResponseDto createChallengeGroup(ChallengeGroupRequestDto challengeGroupRequestDto,
       Member member) {
-    ChallengeGroup challengeGroup = ChallengeGroup.fromRequest(challengeGroupRequestDto, member);
-    memberGroupRepository.save(MemberGroup.create(challengeGroup, member).toEntity());
-    return ChallengeGroupResponseDto.fromEntity(challengeGroupRepository.save(challengeGroup.toEntity()));
+    ChallengeGroupEntity challengeGroupEntity = challengeGroupRepository.save(
+        ChallengeGroup.fromRequest(challengeGroupRequestDto, member).toEntity());
+
+    memberGroupRepository.save(MemberGroup.create(ChallengeGroup.fromEntity(challengeGroupEntity), member).toEntity());
+    return ChallengeGroupResponseDto.fromEntity(challengeGroupEntity);
   }
 
   public ChallengeGroupResponseDto joinChallengeGroup(String inviteLink, Member member) {
