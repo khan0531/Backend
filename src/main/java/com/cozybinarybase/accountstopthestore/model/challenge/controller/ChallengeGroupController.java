@@ -4,6 +4,8 @@ import com.cozybinarybase.accountstopthestore.model.challenge.dto.ChallengeGroup
 import com.cozybinarybase.accountstopthestore.model.challenge.dto.SavingMoneyRequestDto;
 import com.cozybinarybase.accountstopthestore.model.challenge.service.ChallengeGroupService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import com.cozybinarybase.accountstopthestore.model.message.domain.Message;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -58,8 +60,7 @@ public class ChallengeGroupController {
 
   @PostMapping("/join/{inviteLink}")
   public ResponseEntity<?> joinGroup(@PathVariable String inviteLink, @AuthenticationPrincipal Member member) {
-    challengeGroupService.joinChallengeGroup(inviteLink, member);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(challengeGroupService.joinChallengeGroup(inviteLink, member));
   }
 
   // 서버 추방 & 나가기
@@ -70,4 +71,9 @@ public class ChallengeGroupController {
     return ResponseEntity.ok().build();
   }
 
+  @GetMapping("/{groupId}/messages")
+  public ResponseEntity<?> getMessages(@PathVariable Long groupId, @AuthenticationPrincipal Member member) {
+    List<Message> messages = challengeGroupService.getMessages(groupId, member);
+    return ResponseEntity.ok(messages);
+  }
 }
