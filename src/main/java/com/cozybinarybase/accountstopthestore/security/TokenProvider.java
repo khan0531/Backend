@@ -8,8 +8,10 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -94,22 +96,35 @@ public class TokenProvider {
   }
 
   public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
-    response.setStatus(HttpServletResponse.SC_OK);
+    Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+    accessTokenCookie.setHttpOnly(true);
+    accessTokenCookie.setPath("/");
 
-    response.setHeader(ACCESS_TOKEN_HEADER, TOKEN_PREFIX + accessToken);
-    response.setHeader(REFRESH_TOKEN_HEADER, TOKEN_PREFIX + refreshToken);
-    log.info("Access Token, Refresh Token 헤더 설정 완료");
+    Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+    refreshTokenCookie.setHttpOnly(true);
+    refreshTokenCookie.setPath("/");
+
+    response.addCookie(accessTokenCookie);
+    response.addCookie(refreshTokenCookie);
+
+    log.info("Access Token, Refresh Token 쿠키 설정 완료");
+  }
+
+  public Optional<String> extractToken(HttpServletRequest request, String cookieName) {
+    if (request.getCookies() == null) {
+      return Optional.empty();
+    }
+    return Arrays.stream(request.getCookies())
+        .filter(cookie -> cookie.getName().equals(cookieName))
+        .findFirst()
+        .map(Cookie::getValue);
   }
 
   public Optional<String> extractRefreshToken(HttpServletRequest request) {
-    return Optional.ofNullable(request.getHeader(REFRESH_TOKEN_HEADER))
-        .filter(refreshToken -> refreshToken.startsWith(TOKEN_PREFIX))
-        .map(refreshToken -> refreshToken.replace(TOKEN_PREFIX, ""));
+    return extractToken(request, "refreshToken");
   }
 
   public Optional<String> extractAccessToken(HttpServletRequest request) {
-    return Optional.ofNullable(request.getHeader(ACCESS_TOKEN_HEADER))
-        .filter(refreshToken -> refreshToken.startsWith(TOKEN_PREFIX))
-        .map(refreshToken -> refreshToken.replace(TOKEN_PREFIX, ""));
+    return extractToken(request, "accessToken");
   }
 }

@@ -5,6 +5,7 @@ import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.io.IOException;
+import java.util.Optional;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,23 +32,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
-    String refreshToken = this.tokenProvider.extractRefreshToken(request)
-        .filter(tokenProvider::validateToken)
-        .orElse(null);
+    Optional<String> accessTokenOpt = this.tokenProvider.extractAccessToken(request)
+        .filter(tokenProvider::validateToken);
 
-    if (refreshToken != null) {
-      checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-      return;
+    if (accessTokenOpt.isPresent()) {
+      String accessToken = accessTokenOpt.get();
+      Authentication auth = getAuthentication(accessToken);
+      SecurityContextHolder.getContext().setAuthentication(auth);
+      filterChain.doFilter(request, response);
+    } else {
+      String refreshToken = this.tokenProvider.extractRefreshToken(request)
+          .filter(tokenProvider::validateToken)
+          .orElse(null);
+
+      if (refreshToken != null) {
+        checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
+
+        String newAccessToken = this.tokenProvider.extractAccessToken(request).orElse(null);
+        if (newAccessToken != null) {
+          Authentication newAuth = getAuthentication(newAccessToken);
+          SecurityContextHolder.getContext().setAuthentication(newAuth);
+        }
+
+        filterChain.doFilter(request, response);
+      } else {
+        filterChain.doFilter(request, response);
+      }
     }
-
-    this.tokenProvider.extractAccessToken(request)
-        .filter(tokenProvider::validateToken)
-        .ifPresent(accessToken -> {
-          Authentication auth = getAuthentication(accessToken);
-          SecurityContextHolder.getContext().setAuthentication(auth);
-        });
-
-    filterChain.doFilter(request, response);
   }
 
   public Authentication getAuthentication(String jwt) {
