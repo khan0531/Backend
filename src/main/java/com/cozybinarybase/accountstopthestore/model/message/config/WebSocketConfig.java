@@ -1,5 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.message.config;
 
+import com.cozybinarybase.accountstopthestore.common.handler.AuthHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -14,6 +15,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   private final StompHandler stompHandler;
+  private final AuthHandshakeInterceptor authHandshakeInterceptor;
 
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -24,7 +26,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws")
-        .setAllowedOriginPatterns("*");
+        .setAllowedOriginPatterns("*")
+        .addInterceptors(authHandshakeInterceptor);
 //        .withSockJS();
   }
 
