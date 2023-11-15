@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -96,16 +97,22 @@ public class TokenProvider {
   }
 
   public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
-    Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
-    accessTokenCookie.setHttpOnly(true);
-    accessTokenCookie.setPath("/");
+    ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+        .httpOnly(true)
+        .path("/")
+        .sameSite("None")
+        .secure(true)
+        .build();
 
-    Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-    refreshTokenCookie.setHttpOnly(true);
-    refreshTokenCookie.setPath("/");
+    ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+        .httpOnly(true)
+        .path("/")
+        .sameSite("None")
+        .secure(true)
+        .build();
 
-    response.addCookie(accessTokenCookie);
-    response.addCookie(refreshTokenCookie);
+    response.addHeader("Set-Cookie", accessTokenCookie.toString());
+    response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
     log.info("Access Token, Refresh Token 쿠키 설정 완료");
   }
