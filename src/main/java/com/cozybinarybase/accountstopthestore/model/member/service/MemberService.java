@@ -5,6 +5,7 @@ import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.repository.AccountBookRepository;
 import com.cozybinarybase.accountstopthestore.model.asset.persist.repository.AssetRepository;
+import com.cozybinarybase.accountstopthestore.model.category.dto.constants.CategoryType;
 import com.cozybinarybase.accountstopthestore.model.category.persist.entity.CategoryEntity;
 import com.cozybinarybase.accountstopthestore.model.category.persist.repository.CategoryRepository;
 import com.cozybinarybase.accountstopthestore.model.images.persist.repository.ImageRepository;
@@ -101,12 +102,11 @@ public class MemberService implements UserDetailsService {
     member.passwordEncode(this.passwordEncoder);
     MemberEntity memberEntity = this.memberRepository.save(member.toEntity());
 
-
-
     List<CategoryEntity> categories = Arrays.stream(categoryNames)
         .map(categoryName -> CategoryEntity.builder()
             .member(memberEntity)
             .name(categoryName)
+            .type(CategoryType.SPENDING)
             .build())
         .collect(Collectors.toList());
 
