@@ -14,13 +14,12 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
 public class StompHandler implements ChannelInterceptor {
-
-  private final TokenProvider tokenProvider;
 
   private final ChallengeGroupRepository challengeGroupRepository;
 
@@ -31,17 +30,12 @@ public class StompHandler implements ChannelInterceptor {
   @Override
   public Message<?> preSend(Message<?> message, MessageChannel channel) {
     StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+    String email = (String) accessor.getSessionAttributes().get("email");
     if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-      String jwt = accessor.getFirstNativeHeader("Authorization");
-      if (!tokenProvider.validateToken(jwt)) {
+      if (email == null || email.trim().isEmpty()) {
         throw new AccessDeniedException("Access token이 유효하지 않습니다.");
       }
-
-      Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
-      sessionAttributes.put("email", tokenProvider.getUsername(jwt));
-      accessor.setSessionAttributes(sessionAttributes);
     } else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-      String email = (String) accessor.getSessionAttributes().get("email");
       String destination = accessor.getDestination();
       Long groupId = Long.parseLong(destination.substring(destination.lastIndexOf("/") + 1));
       ChallengeGroupEntity challengeGroupEntity = challengeGroupRepository.findById(groupId)
