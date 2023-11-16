@@ -85,6 +85,7 @@ public class Member implements UserDetails {
 
   public MemberEntity toEntity() {
     return MemberEntity.builder()
+        .id(this.id)
         .authType(this.authType)
         .oauthId(this.oauthId)
         .refreshToken(this.refreshToken)
