@@ -127,6 +127,12 @@ public class MemberService implements UserDetailsService {
     String accessToken = this.tokenProvider.generateAccessToken(member);
     String refreshToken = this.tokenProvider.generateRefreshToken();
 
+    memberRepository.findByEmail(member.getEmail())
+            .ifPresent(memberEntity -> {
+              memberEntity.setRefreshToken(refreshToken);
+              memberRepository.save(memberEntity);
+            });
+
     tokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
   }
 

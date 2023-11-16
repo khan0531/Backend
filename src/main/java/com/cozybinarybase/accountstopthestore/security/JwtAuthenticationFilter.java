@@ -2,10 +2,12 @@ package com.cozybinarybase.accountstopthestore.security;
 
 
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -46,10 +48,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           .orElse(null);
 
       if (refreshToken != null) {
-        checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-
-        String newAccessToken = this.tokenProvider.extractAccessToken(request).orElse(null);
-        if (newAccessToken != null) {
+        refreshToken = checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
+        Optional<MemberEntity> memberEntityOpt = memberRepository.findByRefreshToken(refreshToken);
+        if (memberEntityOpt.isPresent()) {
+          Member member = Member.fromEntity(memberEntityOpt.get());
+          String newAccessToken = this.tokenProvider.generateAccessToken(member);
           Authentication newAuth = getAuthentication(newAccessToken);
           SecurityContextHolder.getContext().setAuthentication(newAuth);
         }
@@ -67,14 +70,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
   }
 
-  public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
+  public String checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
+    AtomicReference<String> newRefreshTokenRef = new AtomicReference<>();
+
     memberRepository.findByRefreshToken(refreshToken)
         .ifPresent(memberEntity -> {
           Member member = Member.fromEntity(memberEntity);
           String reIssuedRefreshToken = reIssueRefreshToken(member);
           tokenProvider.sendAccessAndRefreshToken(response, tokenProvider.generateAccessToken(member),
               reIssuedRefreshToken);
+          newRefreshTokenRef.set(reIssuedRefreshToken);
         });
+
+    return newRefreshTokenRef.get();
   }
 
   private String reIssueRefreshToken(Member member) {
