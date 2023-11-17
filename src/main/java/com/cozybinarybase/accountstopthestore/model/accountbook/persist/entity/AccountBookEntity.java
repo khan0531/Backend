@@ -78,6 +78,12 @@ public class AccountBookEntity {
   @Column(name = "updatedAt", nullable = false)
   private LocalDateTime updatedAt;
 
+  @Column(name = "latitude")
+  private Double latitude;
+
+  @Column(name = "longitude")
+  private Double longitude;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "categoryId")
   private CategoryEntity category;

@@ -13,6 +13,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AccountBookRepository extends JpaRepository<AccountBookEntity, Long>,
     AccountBookRepositoryCustom {
@@ -50,4 +52,12 @@ public interface AccountBookRepository extends JpaRepository<AccountBookEntity, 
     // 결과 반환
     return query.fetch();
   }
+
+  @Query(value = "SELECT * FROM account_book WHERE member_id = :memberId AND "
+      + "ST_Distance_Sphere(point(longitude, latitude), point(:longitude, :latitude)) "
+      + "<= :radius", nativeQuery = true)
+  List<AccountBookEntity> findWithinRadius(@Param("latitude") double latitude,
+      @Param("longitude") double longitude,
+      @Param("radius") double radius,
+      @Param("memberId") Long memberId);
 }

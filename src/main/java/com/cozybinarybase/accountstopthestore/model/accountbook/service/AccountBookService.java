@@ -1,5 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.accountbook.service;
 
+import com.cozybinarybase.accountstopthestore.common.service.AddressService;
 import com.cozybinarybase.accountstopthestore.model.accountbook.domain.AccountBook;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookImageResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookResponseDto;
@@ -30,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +54,8 @@ public class AccountBookService {
   private final MemberService memberService;
   private final AccountBook accountBook;
   private final ImageRepository imageRepository;
+
+  private final AddressService addressService;
 
   @Transactional
   public AccountBookSaveResponseDto saveAccountBook(
@@ -79,6 +83,19 @@ public class AccountBookService {
     images.forEach(image -> image.setAccountBook(finalAccountBookEntity));
 
     accountBookEntity.setImages(images);
+
+    Map<String, String> coordinates = addressService.getCoordinates(accountBookEntity.getAddress());
+
+    if (!coordinates.isEmpty()) {
+      double latitude = Double.parseDouble(coordinates.get("y"));
+      double longitude = Double.parseDouble(coordinates.get("x"));
+
+      accountBookEntity.setLatitude(latitude);
+      accountBookEntity.setLongitude(longitude);
+    } else {
+      accountBookEntity.setLatitude(null);
+      accountBookEntity.setLongitude(null);
+    }
 
     // AccountBookEntity 저장
     accountBookEntity = accountBookRepository.save(accountBookEntity);
@@ -118,6 +135,19 @@ public class AccountBookService {
     });
 
     accountBookEntity.setImages(images);
+
+    Map<String, String> coordinates = addressService.getCoordinates(accountBookEntity.getAddress());
+
+    if (!coordinates.isEmpty()) {
+      double latitude = Double.parseDouble(coordinates.get("y"));
+      double longitude = Double.parseDouble(coordinates.get("x"));
+
+      accountBookEntity.setLatitude(latitude);
+      accountBookEntity.setLongitude(longitude);
+    } else {
+      accountBookEntity.setLatitude(null);
+      accountBookEntity.setLongitude(null);
+    }
 
     AccountBookEntity updatedAccountBookEntity = accountBookRepository.save(accountBookEntity);
 
@@ -248,5 +278,13 @@ public class AccountBookService {
         .orElseThrow(AccountBookNotValidException::new);
 
     return AccountBookResponseDto.fromEntity(accountBookEntity);
+  }
+
+  public List<AccountBookResponseDto> findAccountBooksNearby(double latitude, double longitude, double radius, Member member) {
+    List<AccountBookEntity> accountBookEntities = accountBookRepository
+        .findWithinRadius(latitude, longitude, radius, member.getId());
+    return accountBookEntities.stream()
+        .map(AccountBookResponseDto::fromEntity)
+        .collect(Collectors.toList());
   }
 }

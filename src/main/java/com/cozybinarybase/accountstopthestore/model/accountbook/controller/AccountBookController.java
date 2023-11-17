@@ -11,7 +11,6 @@ import com.cozybinarybase.accountstopthestore.model.accountbook.dto.constants.Tr
 import com.cozybinarybase.accountstopthestore.model.accountbook.service.AccountBookService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -132,5 +131,15 @@ public class AccountBookController {
       @AuthenticationPrincipal Member member) {
     return ResponseEntity.ok().body(accountBookService.getTransactionStatistics(
         startDate, endDate, transactionType, member));
+  }
+
+  @GetMapping("/nearby")
+  public ResponseEntity<List<AccountBookResponseDto>> getNearbyAccountBooks(@RequestParam double lat,
+      @RequestParam double lng,
+      @AuthenticationPrincipal Member member) {
+    double radius = 100.0;
+    List<AccountBookResponseDto> nearbyAccountBooks = accountBookService
+        .findAccountBooksNearby(lat, lng, radius, member);
+    return ResponseEntity.ok(nearbyAccountBooks);
   }
 }
