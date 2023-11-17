@@ -47,3 +47,7 @@ azure:
   ocr:
     endpoint: ${AZURE_OCR_ENDPOINT:azure_ocr_endpoint}
     key: ${AZURE_OCR_KEY:azure_ocr_key}
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY:kakao_api_key}
