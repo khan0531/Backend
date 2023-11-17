@@ -190,7 +190,7 @@ public class AccountBookService {
   }
 
   @Transactional(readOnly = true)
-  public AccountBookCategoryResponseDto getCategoryNamesByKeyword(String query, int limit,
+  public List<String> getCategoryNamesByKeyword(String query, int limit,
       Member member) {
     memberService.validateAndGetMember(member);
 
@@ -200,7 +200,7 @@ public class AccountBookService {
         .map(CategoryEntity::getName)
         .collect(Collectors.toList());
 
-    return AccountBookCategoryResponseDto.of(categories);
+    return categories;
   }
 
   @Transactional(readOnly = true)

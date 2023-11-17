@@ -91,7 +91,7 @@ public class AccountBookController {
       @RequestParam String query,
       @RequestParam(defaultValue = "5") int limit,
       @AuthenticationPrincipal Member member) {
-    AccountBookCategoryResponseDto names = accountBookService.getCategoryNamesByKeyword(
+    List<String> names = accountBookService.getCategoryNamesByKeyword(
         query, limit, member);
 
     return ResponseEntity.ok().body(names);
