@@ -194,13 +194,10 @@ public class AccountBookService {
       Member member) {
     memberService.validateAndGetMember(member);
 
-    Pageable pageable = PageRequest.of(0, limit);
-    Page<AccountBookEntity> accountBookEntities =
-        accountBookRepository.findByMember_IdAndCategory_NameStartingWithIgnoreCase(
-            member.getId(), query, pageable);
-
-    List<String> categories = accountBookEntities.stream()
-        .map(e -> e.getCategory().getName())
+    List<String> categories = categoryRepository.findByMemberIdAndNameStartingWithIgnoreCase(
+            member.getId(), query)
+        .stream()
+        .map(CategoryEntity::getName)
         .collect(Collectors.toList());
 
     return AccountBookCategoryResponseDto.of(categories);
