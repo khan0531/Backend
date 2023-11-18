@@ -40,8 +40,8 @@ public class AccountBookResponseDto {
   @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime updatedAt;
 
-  double latitude;
-  double longitude;
+  private Double latitude;
+  private Double longitude;
 
   public static AccountBookResponseDto fromEntity(AccountBookEntity accountBookEntity) {
     List<Long> imageIdList = accountBookEntity.getImages().stream()
