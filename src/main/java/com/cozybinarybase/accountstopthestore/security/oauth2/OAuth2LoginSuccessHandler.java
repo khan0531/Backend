@@ -24,6 +24,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     String accessToken = this.tokenProvider.generateAccessToken(customOAuth2User);
     String refreshToken = this.tokenProvider.generateRefreshToken();
     this.tokenProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+
+    response.sendRedirect("http://localhost:5173");
   }
 
 //  private void loginSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User) throws IOException {
