@@ -30,6 +30,7 @@ import com.cozybinarybase.accountstopthestore.model.member.service.MemberService
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -183,6 +184,26 @@ public class AccountBookService {
             transactionType,
             member.getId(),
             pageable).getContent();
+
+    return accountBookEntityList.stream()
+        .map(AccountBookResponseDto::fromEntity)
+        .collect(Collectors.toList());
+  }
+
+  @Transactional(readOnly = true)
+  public List<AccountBookResponseDto> getMonthlyAccountBooks(
+      YearMonth yearMonth, Member member) {
+
+    memberService.validateAndGetMember(member);
+
+    LocalDate startDate = yearMonth.atDay(1);
+    LocalDate endDate = yearMonth.atEndOfMonth();
+
+    List<AccountBookEntity> accountBookEntityList =
+        accountBookRepository.findByTransactedAtBetweenAndMember_Id(
+            startDate.atStartOfDay(),
+            endDate.atTime(LocalTime.MAX),
+            member.getId());
 
     return accountBookEntityList.stream()
         .map(AccountBookResponseDto::fromEntity)
