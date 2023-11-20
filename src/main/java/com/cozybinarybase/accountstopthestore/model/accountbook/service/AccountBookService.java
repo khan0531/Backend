@@ -1,5 +1,6 @@
 package com.cozybinarybase.accountstopthestore.model.accountbook.service;
 
+import com.cozybinarybase.accountstopthestore.common.service.AddressService;
 import com.cozybinarybase.accountstopthestore.model.accountbook.domain.AccountBook;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookImageResponseDto;
 import com.cozybinarybase.accountstopthestore.model.accountbook.dto.AccountBookResponseDto;
@@ -29,7 +30,9 @@ import com.cozybinarybase.accountstopthestore.model.member.service.MemberService
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +55,8 @@ public class AccountBookService {
   private final MemberService memberService;
   private final AccountBook accountBook;
   private final ImageRepository imageRepository;
+
+  private final AddressService addressService;
 
   @Transactional
   public AccountBookSaveResponseDto saveAccountBook(
@@ -79,6 +84,19 @@ public class AccountBookService {
     images.forEach(image -> image.setAccountBook(finalAccountBookEntity));
 
     accountBookEntity.setImages(images);
+
+    Map<String, String> coordinates = addressService.getCoordinates(accountBookEntity.getAddress());
+
+    if (!coordinates.isEmpty()) {
+      double latitude = Double.parseDouble(coordinates.get("y"));
+      double longitude = Double.parseDouble(coordinates.get("x"));
+
+      accountBookEntity.setLatitude(latitude);
+      accountBookEntity.setLongitude(longitude);
+    } else {
+      accountBookEntity.setLatitude(null);
+      accountBookEntity.setLongitude(null);
+    }
 
     // AccountBookEntity 저장
     accountBookEntity = accountBookRepository.save(accountBookEntity);
@@ -118,6 +136,19 @@ public class AccountBookService {
     });
 
     accountBookEntity.setImages(images);
+
+    Map<String, String> coordinates = addressService.getCoordinates(accountBookEntity.getAddress());
+
+    if (!coordinates.isEmpty()) {
+      double latitude = Double.parseDouble(coordinates.get("y"));
+      double longitude = Double.parseDouble(coordinates.get("x"));
+
+      accountBookEntity.setLatitude(latitude);
+      accountBookEntity.setLongitude(longitude);
+    } else {
+      accountBookEntity.setLatitude(null);
+      accountBookEntity.setLongitude(null);
+    }
 
     AccountBookEntity updatedAccountBookEntity = accountBookRepository.save(accountBookEntity);
 
@@ -160,20 +191,37 @@ public class AccountBookService {
   }
 
   @Transactional(readOnly = true)
-  public AccountBookCategoryResponseDto getCategoryNamesByKeyword(String query, int limit,
+  public List<AccountBookResponseDto> getMonthlyAccountBooks(
+      YearMonth yearMonth, Member member) {
+
+    memberService.validateAndGetMember(member);
+
+    LocalDate startDate = yearMonth.atDay(1);
+    LocalDate endDate = yearMonth.atEndOfMonth();
+
+    List<AccountBookEntity> accountBookEntityList =
+        accountBookRepository.findByTransactedAtBetweenAndMember_Id(
+            startDate.atStartOfDay(),
+            endDate.atTime(LocalTime.MAX),
+            member.getId());
+
+    return accountBookEntityList.stream()
+        .map(AccountBookResponseDto::fromEntity)
+        .collect(Collectors.toList());
+  }
+
+  @Transactional(readOnly = true)
+  public List<String> getCategoryNamesByKeyword(String query, int limit,
       Member member) {
     memberService.validateAndGetMember(member);
 
-    Pageable pageable = PageRequest.of(0, limit);
-    Page<AccountBookEntity> accountBookEntities =
-        accountBookRepository.findByMember_IdAndCategory_NameStartingWithIgnoreCase(
-            member.getId(), query, pageable);
-
-    List<String> categories = accountBookEntities.stream()
-        .map(e -> e.getCategory().getName())
+    List<String> categories = categoryRepository.findByMemberIdAndNameStartingWithIgnoreCase(
+            member.getId(), query)
+        .stream()
+        .map(CategoryEntity::getName)
         .collect(Collectors.toList());
 
-    return AccountBookCategoryResponseDto.of(categories);
+    return categories;
   }
 
   @Transactional(readOnly = true)
@@ -248,5 +296,13 @@ public class AccountBookService {
         .orElseThrow(AccountBookNotValidException::new);
 
     return AccountBookResponseDto.fromEntity(accountBookEntity);
+  }
+
+  public List<AccountBookResponseDto> findAccountBooksNearby(double latitude, double longitude, double radius, Member member) {
+    List<AccountBookEntity> accountBookEntities = accountBookRepository
+        .findWithinRadius(latitude, longitude, radius, member.getId());
+    return accountBookEntities.stream()
+        .map(AccountBookResponseDto::fromEntity)
+        .collect(Collectors.toList());
   }
 }

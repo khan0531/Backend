@@ -40,6 +40,9 @@ public class AccountBookResponseDto {
   @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime updatedAt;
 
+  private Double latitude;
+  private Double longitude;
+
   public static AccountBookResponseDto fromEntity(AccountBookEntity accountBookEntity) {
     List<Long> imageIdList = accountBookEntity.getImages().stream()
         .map(ImageEntity::getImageId)
@@ -59,6 +62,8 @@ public class AccountBookResponseDto {
         .isInstallment(accountBookEntity.getIsInstallment())
         .createdAt(accountBookEntity.getCreatedAt())
         .updatedAt(accountBookEntity.getUpdatedAt())
+        .latitude(accountBookEntity.getLatitude())
+        .longitude(accountBookEntity.getLongitude())
         .build();
   }
 }
