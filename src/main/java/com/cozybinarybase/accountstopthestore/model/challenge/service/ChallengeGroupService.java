@@ -15,6 +15,7 @@ import com.cozybinarybase.accountstopthestore.model.challenge.security.RandomStr
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.member.persist.repository.MemberRepository;
+import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import com.cozybinarybase.accountstopthestore.model.message.domain.Message;
 import com.cozybinarybase.accountstopthestore.model.message.persist.entity.MessageEntity;
 import com.cozybinarybase.accountstopthestore.model.message.persist.repository.MessageRepository;
@@ -32,6 +33,7 @@ public class ChallengeGroupService {
   private final MemberRepository memberRepository;
   private final MessageRepository messageRepository;
   private final MessageService messageService;
+  private final MemberService memberService;
 
   public InviteLinkResponseDto createInviteLink(Long groupId, Member member) {
     ChallengeGroup challengeGroup = challengeGroupRepository.findById(groupId)

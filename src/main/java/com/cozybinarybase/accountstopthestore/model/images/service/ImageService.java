@@ -2,13 +2,17 @@ package com.cozybinarybase.accountstopthestore.model.images.service;
 
 import com.cozybinarybase.accountstopthestore.model.accountbook.persist.repository.AccountBookRepository;
 import com.cozybinarybase.accountstopthestore.model.images.dto.ImageUploadResponseDto;
+import com.cozybinarybase.accountstopthestore.model.images.dto.OcrResultDto;
 import com.cozybinarybase.accountstopthestore.model.images.exception.FileIsNotValidImageException;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity;
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity.ImageType;
 import com.cozybinarybase.accountstopthestore.model.images.persist.repository.ImageRepository;
 import com.cozybinarybase.accountstopthestore.model.images.service.util.ImageUtil;
+import com.cozybinarybase.accountstopthestore.model.images.service.util.OcrUtil;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,31 +34,25 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class ImageService {
-
-  @Value("${azure.ocr.endpoint}")
-  private String AZURE_OCR_ENDPOINT;
-  @Value("${azure.ocr.key}")
-  private String AZURE_OCR_KEY;
   @Value("${app.domainUrl}")
   private String domainUrl;
-
   private final String homeDirectory = System.getProperty("user.home");
   private final Path imagesDirectory = Paths.get(homeDirectory, "asts-images");
 
 
   private final ImageUtil imageUtil;
-
   private static final int THUMBNAIL_WIDTH = 512;
   private static final int THUMBNAIL_HEIGHT = 512;
 
-  private final String MODEL_ID = "prebuilt-receipt";
+
   private final ImageRepository imageRepository;
   private final MemberService memberService;
   private final AccountBookRepository accountBookRepository;
+  private final OcrUtil ocrUtil;
 
 
   public ImageUploadResponseDto uploadFile(MultipartFile file, boolean isReceipt,
-      Member member) throws IOException {
+      Member member) throws Exception {
 
     memberService.validateAndGetMember(member);
 
@@ -95,10 +95,74 @@ public class ImageService {
         member, originalImage);
 
     // OCR 수행 로직(미구현)
+    OcrResultDto ocrResultDto = null;
+
+    if (isReceipt) {
+      String operationLocation = ocrUtil.startDocumentAnalysis(file);
+      String analysisResult = ocrUtil.getDocumentAnalysisResult(operationLocation);
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode rootNode = objectMapper.readTree(analysisResult);
+      JsonNode content = rootNode.get("analyzeResult").get("content");
+
+      Pattern datePattern = Pattern.compile("(\\d{4})[ .]+(\\d{2})[ .]+(\\d{2})[ .]+(\\d{2}):(\\d{2}):(\\d{2})");
+      Pattern amountPattern = Pattern.compile("판매 합계\\n(\\d+,?\\d*)");
+      Pattern vendorPattern = Pattern.compile("\\(주\\) ([^\\n]+)");
+      Pattern addressPattern = Pattern.compile("매장: ([^\\(]+)");
+
+      Matcher dateMatcher = datePattern.matcher(content.asText());
+      Matcher amountMatcher = amountPattern.matcher(content.asText());
+      Matcher vendorMatcher = vendorPattern.matcher(content.asText());
+      Matcher addressMatcher = addressPattern.matcher(content.asText());
+
+      String ocrDate = null;
+      Long ocrAmount = null;
+      String ocrVendor = null;
+      String ocrAddress = null;
+
+      if (dateMatcher.find()) {
+        // 날짜 형식의 공백 및 마침표를 정리합니다.
+        ocrDate = String.join(".",
+            dateMatcher.group(1), // 년
+            dateMatcher.group(2), // 월
+            dateMatcher.group(3)  // 일
+        ) + "T" + dateMatcher.group(4) + ":" + // 시
+            dateMatcher.group(5) + ":" + // 분
+            dateMatcher.group(6);        // 초
+      }
+
+      if (amountMatcher.find()) {
+        // 금액에서 콤마를 제거하고 숫자형으로 변환합니다.
+        String amountString = amountMatcher.group(1).replace(",", "");
+        ocrAmount = Long.parseLong(amountString);
+      }
+
+      if (vendorMatcher.find()) {
+        ocrVendor = vendorMatcher.group(1).trim();
+      }
+
+      if (addressMatcher.find()) {
+        ocrAddress = addressMatcher.group(1).trim();
+      }
+
+      System.out.println("OCR Date: " + ocrDate);
+      System.out.println("OCR Amount: " + ocrAmount);
+      System.out.println("OCR Vendor: " + ocrVendor);
+      System.out.println("OCR Address: " + ocrAddress);
+
+      System.out.println("OCR Analysis Result: " + content.toPrettyString());
+      ocrResultDto = OcrResultDto.builder()
+          .date(ocrDate)
+          .amount(ocrAmount)
+          .vendor(ocrVendor)
+          .address(ocrAddress)
+          .build();
+    }
 
     // 원본 이미지의 id를 반환
     return ImageUploadResponseDto.builder()
         .imageId(originalImage.getImageId())
+        .ocrResult(ocrResultDto)
         .build();
   }
 
