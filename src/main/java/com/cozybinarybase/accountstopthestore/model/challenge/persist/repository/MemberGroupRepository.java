@@ -17,4 +17,6 @@ public interface MemberGroupRepository extends JpaRepository<MemberGroupEntity, 
 
   Optional<MemberGroupEntity> findByMemberAndChallengeGroup(MemberEntity memberEntity,
       ChallengeGroupEntity challengeGroupEntity);
+
+  List<MemberGroupEntity> findByMember(MemberEntity entity);
 }
