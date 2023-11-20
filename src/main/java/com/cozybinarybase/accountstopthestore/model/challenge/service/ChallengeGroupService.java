@@ -8,6 +8,7 @@ import com.cozybinarybase.accountstopthestore.model.challenge.dto.InviteLinkResp
 import com.cozybinarybase.accountstopthestore.model.challenge.dto.MemberGroupResponseDto;
 import com.cozybinarybase.accountstopthestore.model.challenge.dto.SavingMoneyRequestDto;
 import com.cozybinarybase.accountstopthestore.model.challenge.persist.entity.ChallengeGroupEntity;
+import com.cozybinarybase.accountstopthestore.model.challenge.persist.entity.MemberGroupEntity;
 import com.cozybinarybase.accountstopthestore.model.challenge.persist.repository.ChallengeGroupRepository;
 import com.cozybinarybase.accountstopthestore.model.challenge.persist.repository.MemberGroupRepository;
 import com.cozybinarybase.accountstopthestore.model.challenge.security.RandomStringGenerator;
@@ -118,7 +119,13 @@ public class ChallengeGroupService {
 
   //TODO
   public List<ChallengeGroupResponseDto> getChallengeGroups(Member member) {
-    return null;
+    memberService.validateAndGetMember(member);
+    List<ChallengeGroupEntity> challengeGroupEntities = memberGroupRepository.findByMember(member.toEntity())
+        .stream()
+        .map(MemberGroupEntity::getChallengeGroup)
+        .toList();
+
+    return ChallengeGroupResponseDto.fromEntities(challengeGroupEntities);
   }
 
   public ChallengeGroupResponseDto updateChallengeGroup(Long groupId, ChallengeGroupRequestDto challengeGroupRequestDto,
