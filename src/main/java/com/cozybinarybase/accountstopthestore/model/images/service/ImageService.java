@@ -94,7 +94,7 @@ public class ImageService {
     saveImageEntity(thumbnailFilePath, thumbnailFileName, ImageType.THUMBNAIL, "image/jpeg",
         member, originalImage);
 
-    // OCR 수행 로직(미구현)
+    // OCR 수행 로직
     OcrResultDto ocrResultDto = null;
 
     if (isReceipt) {
@@ -121,7 +121,7 @@ public class ImageService {
       String ocrAddress = null;
 
       if (dateMatcher.find()) {
-        // 날짜 형식의 공백 및 마침표를 정리합니다.
+        // 날짜 형식의 공백 및 마침표를 정리
         ocrDate = String.join(".",
             dateMatcher.group(1), // 년
             dateMatcher.group(2), // 월
@@ -132,7 +132,7 @@ public class ImageService {
       }
 
       if (amountMatcher.find()) {
-        // 금액에서 콤마를 제거하고 숫자형으로 변환합니다.
+        // 금액에서 콤마를 제거하고 숫자형으로 변환
         String amountString = amountMatcher.group(1).replace(",", "");
         ocrAmount = Long.parseLong(amountString);
       }
