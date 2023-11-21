@@ -5,6 +5,8 @@ import com.cozybinarybase.accountstopthestore.model.budget.dto.BudgetSaveRequest
 import com.cozybinarybase.accountstopthestore.model.budget.persist.entity.BudgetEntity;
 import com.cozybinarybase.accountstopthestore.model.budget.service.BudgetService;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
+import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
+import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import javax.validation.Valid;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,5 +36,14 @@ public class BudgetController {
       @AuthenticationPrincipal Member member) {
     BudgetResponseDto responseDto = budgetService.saveBudget(budget, member);
     return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+  }
+
+  @GetMapping
+  public ResponseEntity<BudgetResponseDto> getBudget(
+      @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth,
+      @AuthenticationPrincipal Member member) {
+
+    BudgetResponseDto responseDto = budgetService.getBudgetByYearMonth(yearMonth, member);
+    return ResponseEntity.ok(responseDto);
   }
 }
