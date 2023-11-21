@@ -8,24 +8,20 @@ import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageE
 import com.cozybinarybase.accountstopthestore.model.images.persist.entity.ImageEntity.ImageType;
 import com.cozybinarybase.accountstopthestore.model.images.persist.repository.ImageRepository;
 import com.cozybinarybase.accountstopthestore.model.images.service.util.ImageUtil;
+import com.cozybinarybase.accountstopthestore.model.images.service.util.OcrResult;
+import com.cozybinarybase.accountstopthestore.model.images.service.util.OcrResultExtractor;
 import com.cozybinarybase.accountstopthestore.model.images.service.util.OcrUtil;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -105,57 +101,19 @@ public class ImageService {
       JsonNode rootNode = objectMapper.readTree(analysisResult);
       JsonNode content = rootNode.get("analyzeResult").get("content");
 
-      Pattern datePattern = Pattern.compile("(\\d{4})[ .]+(\\d{2})[ .]+(\\d{2})[ .]+(\\d{2}):(\\d{2}):(\\d{2})");
-      Pattern amountPattern = Pattern.compile("판매 합계\\n(\\d+,?\\d*)");
-      Pattern vendorPattern = Pattern.compile("\\(주\\) ([^\\n]+)");
-      Pattern addressPattern = Pattern.compile("매장: ([^\\(]+)");
+      OcrResult ocrResult = new OcrResultExtractor().extractOcrResult(content);
 
-      Matcher dateMatcher = datePattern.matcher(content.asText());
-      Matcher amountMatcher = amountPattern.matcher(content.asText());
-      Matcher vendorMatcher = vendorPattern.matcher(content.asText());
-      Matcher addressMatcher = addressPattern.matcher(content.asText());
-
-      String ocrDate = null;
-      Long ocrAmount = null;
-      String ocrVendor = null;
-      String ocrAddress = null;
-
-      if (dateMatcher.find()) {
-        // 날짜 형식의 공백 및 마침표를 정리
-        ocrDate = String.join(".",
-            dateMatcher.group(1), // 년
-            dateMatcher.group(2), // 월
-            dateMatcher.group(3)  // 일
-        ) + "T" + dateMatcher.group(4) + ":" + // 시
-            dateMatcher.group(5) + ":" + // 분
-            dateMatcher.group(6);        // 초
-      }
-
-      if (amountMatcher.find()) {
-        // 금액에서 콤마를 제거하고 숫자형으로 변환
-        String amountString = amountMatcher.group(1).replace(",", "");
-        ocrAmount = Long.parseLong(amountString);
-      }
-
-      if (vendorMatcher.find()) {
-        ocrVendor = vendorMatcher.group(1).trim();
-      }
-
-      if (addressMatcher.find()) {
-        ocrAddress = addressMatcher.group(1).trim();
-      }
-
-      System.out.println("OCR Date: " + ocrDate);
-      System.out.println("OCR Amount: " + ocrAmount);
-      System.out.println("OCR Vendor: " + ocrVendor);
-      System.out.println("OCR Address: " + ocrAddress);
+      System.out.println("OCR Date: " + ocrResult.getOcrDate());
+      System.out.println("OCR Amount: " + ocrResult.getOcrAmount());
+      System.out.println("OCR Vendor: " + ocrResult.getOcrVendor());
+      System.out.println("OCR Address: " + ocrResult.getOcrAddress());
 
       System.out.println("OCR Analysis Result: " + content.toPrettyString());
       ocrResultDto = OcrResultDto.builder()
-          .date(ocrDate)
-          .amount(ocrAmount)
-          .vendor(ocrVendor)
-          .address(ocrAddress)
+          .date(ocrResult.getOcrDate())
+          .amount(ocrResult.getOcrAmount())
+          .vendor(ocrResult.getOcrVendor())
+          .address(ocrResult.getOcrAddress())
           .build();
     }
 
