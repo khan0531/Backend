@@ -18,14 +18,18 @@ public class MemberGroup {
 
   private Long id;
   private Long memberId;
+  private String memberName;
   private Long challengeGroupId;
+  private String groupName;
   private Long savedAmount;
 
   public static MemberGroup fromEntity(MemberGroupEntity memberGroupEntity) {
     return MemberGroup.builder()
         .id(memberGroupEntity.getId())
         .memberId(memberGroupEntity.getMember().getId())
+        .memberName(memberGroupEntity.getMember().getName())
         .challengeGroupId(memberGroupEntity.getChallengeGroup().getId())
+        .groupName(memberGroupEntity.getChallengeGroup().getName())
         .savedAmount(memberGroupEntity.getSavedAmount())
         .build();
   }
@@ -33,15 +37,17 @@ public class MemberGroup {
   public static MemberGroup create(ChallengeGroup group, Member member) {
     return MemberGroup.builder()
         .memberId(member.getId())
+        .memberName(member.getName())
         .challengeGroupId(group.getId())
+        .groupName(group.getName())
         .savedAmount(0L)
         .build();
   }
 
   public MemberGroupEntity toEntity() {
     return MemberGroupEntity.builder()
-        .member(MemberEntity.builder().id(memberId).build())
-        .challengeGroup(ChallengeGroupEntity.builder().id(challengeGroupId).build())
+        .member(MemberEntity.builder().id(memberId).name(memberName).build())
+        .challengeGroup(ChallengeGroupEntity.builder().id(challengeGroupId).name(groupName).build())
         .savedAmount(savedAmount)
         .build();
   }
