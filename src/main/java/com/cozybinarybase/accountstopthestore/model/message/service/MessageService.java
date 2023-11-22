@@ -15,6 +15,6 @@ public class MessageService {
 
   public void saveAndSend(Message message) {
     messageRepository.save(message.toEntity());
-    messagingTemplate.convertAndSend("/chat/group/" + message.getGroupId(), message);
+    messagingTemplate.convertAndSend("/chat/groups/" + message.getGroupId(), message);
   }
 }
