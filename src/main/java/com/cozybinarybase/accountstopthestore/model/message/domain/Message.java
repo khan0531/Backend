@@ -6,6 +6,7 @@ import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.persist.entity.MemberEntity;
 import com.cozybinarybase.accountstopthestore.model.message.dto.constants.MessageType;
 import com.cozybinarybase.accountstopthestore.model.message.persist.entity.MessageEntity;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class Message {
   private Long senderId; // 채팅을 보낸 사람
   private String message; // 메시지
   private MessageType messageType;
+  private LocalDateTime createdAt;
 
   public static Message fromEntity(MessageEntity messageEntity) {
     return Message.builder()
@@ -31,6 +33,7 @@ public class Message {
         .senderId(messageEntity.getSender().getId())
         .message(messageEntity.getMessage())
         .messageType(messageEntity.getMessageType())
+        .createdAt(messageEntity.getCreatedAt())
         .build();
   }
 

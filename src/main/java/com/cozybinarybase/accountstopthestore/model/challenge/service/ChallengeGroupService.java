@@ -74,6 +74,10 @@ public class ChallengeGroupService {
       throw new IllegalArgumentException("이미 그룹에 속해있습니다.");
     }
 
+    if (challengeGroup.getMaxMembers() <= memberGroupRepository.countByChallengeGroup(challengeGroup.toEntity())) {
+      throw new IllegalArgumentException("그룹 인원이 꽉 찼습니다.");
+    }
+
     Message enterMessage = Message.createEnterMessage(challengeGroup, member);
 
     messageService.saveAndSend(enterMessage);
