@@ -1,20 +1,22 @@
 package com.cozybinarybase.accountstopthestore.model.member.controller;
 
+import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.domain.Member;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailCodeRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailCodeVerifyRequestDto;
-import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignInRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpRequestDto;
-import com.cozybinarybase.accountstopthestore.common.dto.MessageResponseDto;
+import com.cozybinarybase.accountstopthestore.model.member.dto.EmailSignUpResponseDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.PasswordChangeRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.ResetPasswordLinkRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.dto.ResetPasswordRequestDto;
 import com.cozybinarybase.accountstopthestore.model.member.exception.VerificationCodeException;
 import com.cozybinarybase.accountstopthestore.model.member.service.MemberService;
-import java.util.Map;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,7 +47,7 @@ public class MemberController {
   }
 
   @DeleteMapping("/withdrawal")
-  public ResponseEntity<?> signOut(@AuthenticationPrincipal Member member) {
+  public ResponseEntity<?> withdrawal(@AuthenticationPrincipal Member member) {
     MessageResponseDto response = memberService.withdrawal(member);
 
     return ResponseEntity.ok(response);
@@ -93,5 +95,30 @@ public class MemberController {
 
     MessageResponseDto response = memberService.resetPassword(memberId, token, requestDto.getPassword());
     return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("/sign-out")
+  public ResponseEntity<?> signOut() {
+    ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", "")
+        .httpOnly(true)
+        .path("/")
+        .sameSite("None")
+        .secure(true)
+        .maxAge(0)
+        .build();
+
+    ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")
+        .httpOnly(true)
+        .path("/")
+        .sameSite("None")
+        .secure(true)
+        .maxAge(0)
+        .build();
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+    headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+    return ResponseEntity.status(HttpStatus.OK).headers(headers).body("로그아웃 되었습니다.");
   }
 }
