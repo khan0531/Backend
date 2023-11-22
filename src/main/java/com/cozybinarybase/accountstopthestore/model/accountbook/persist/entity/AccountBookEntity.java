@@ -70,6 +70,9 @@ public class AccountBookEntity {
   @Column(name = "isInstallment", nullable = false)
   private Boolean isInstallment;
 
+  @Column(name = "installmentMonth")
+  private Integer installmentMonth;
+
   @CreatedDate
   @Column(name = "createdAt", nullable = false)
   private LocalDateTime createdAt;

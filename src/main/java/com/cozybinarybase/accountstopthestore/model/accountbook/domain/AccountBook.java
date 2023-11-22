@@ -31,6 +31,7 @@ public class AccountBook {
   private String address;
   private String memo;
   private Boolean isInstallment;
+  private Integer installmentMonth;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private Long categoryId;
@@ -50,6 +51,7 @@ public class AccountBook {
         .memo(requestDto.getMemo())
         .address(requestDto.getAddress())
         .isInstallment(requestDto.getIsInstallment())
+        .installmentMonth(requestDto.getInstallmentMonth())
         .categoryId(categoryId)
         .assetId(assetId)
         .memberId(memberId)
@@ -105,6 +107,7 @@ public class AccountBook {
         .address(this.address)
         .memo(this.memo)
         .isInstallment(this.isInstallment)
+        .installmentMonth(this.installmentMonth)
         .createdAt(this.createdAt)
         .updatedAt(this.updatedAt)
         .category(CategoryEntity.builder().id(this.categoryId).name(this.categoryName).build())
@@ -124,6 +127,7 @@ public class AccountBook {
         .address(accountBookEntity.getAddress())
         .memo(accountBookEntity.getMemo())
         .isInstallment(accountBookEntity.getIsInstallment())
+        .installmentMonth(accountBookEntity.getInstallmentMonth())
         .createdAt(accountBookEntity.getCreatedAt())
         .updatedAt(accountBookEntity.getUpdatedAt())
         .categoryId(accountBookEntity.getCategory().getId())

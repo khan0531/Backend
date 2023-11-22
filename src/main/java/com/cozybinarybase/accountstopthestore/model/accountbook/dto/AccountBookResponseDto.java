@@ -33,6 +33,7 @@ public class AccountBookResponseDto {
   private List<Long> imageIds;
   private String recurringType;
   private Boolean isInstallment;
+  private Integer installmentMonth;
 
   @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
   private LocalDateTime createdAt;
@@ -60,6 +61,7 @@ public class AccountBookResponseDto {
         .address(accountBookEntity.getAddress())
         .imageIds(imageIdList)
         .isInstallment(accountBookEntity.getIsInstallment())
+        .installmentMonth(accountBookEntity.getInstallmentMonth())
         .createdAt(accountBookEntity.getCreatedAt())
         .updatedAt(accountBookEntity.getUpdatedAt())
         .latitude(accountBookEntity.getLatitude())
