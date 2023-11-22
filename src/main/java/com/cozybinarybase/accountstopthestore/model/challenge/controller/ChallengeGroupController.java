@@ -47,7 +47,7 @@ public class ChallengeGroupController {
     return ResponseEntity.ok(challengeGroupService.deleteChallengeGroup(groupId, member));
   }
 
-  @PostMapping("/{groupID}/saving")
+  @PostMapping("/{groupId}/saving")
   public ResponseEntity<?> saveMoney(@PathVariable Long groupId,
       @RequestBody SavingMoneyRequestDto savingMoneyRequestDto, @AuthenticationPrincipal Member member) {
     return ResponseEntity.ok(challengeGroupService.saveMoney(groupId, savingMoneyRequestDto, member));
