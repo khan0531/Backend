@@ -9,11 +9,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Component
 public class MemberGroup {
 
   private Long id;
@@ -46,6 +48,7 @@ public class MemberGroup {
 
   public MemberGroupEntity toEntity() {
     return MemberGroupEntity.builder()
+        .id(id)
         .member(MemberEntity.builder().id(memberId).name(memberName).build())
         .challengeGroup(ChallengeGroupEntity.builder().id(challengeGroupId).name(groupName).build())
         .savedAmount(savedAmount)

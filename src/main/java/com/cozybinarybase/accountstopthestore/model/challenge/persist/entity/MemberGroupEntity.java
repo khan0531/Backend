@@ -22,7 +22,7 @@ public class MemberGroupEntity extends BaseTimeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id;
+  private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private MemberEntity member;
