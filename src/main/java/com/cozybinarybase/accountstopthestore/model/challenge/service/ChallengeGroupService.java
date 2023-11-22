@@ -35,6 +35,10 @@ public class ChallengeGroupService {
   private final MessageRepository messageRepository;
   private final MessageService messageService;
 
+  private final ChallengeGroup challengeGroup;
+  private final MemberGroup memberGroup;
+
+
   public InviteLinkResponseDto createInviteLink(Long groupId, Member member) {
     ChallengeGroup challengeGroup = challengeGroupRepository.findById(groupId)
         .map(ChallengeGroup::fromEntity)
@@ -59,9 +63,11 @@ public class ChallengeGroupService {
   public ChallengeGroupResponseDto createChallengeGroup(ChallengeGroupRequestDto challengeGroupRequestDto,
       Member member) {
     ChallengeGroupEntity challengeGroupEntity = challengeGroupRepository.save(
-        ChallengeGroup.fromRequest(challengeGroupRequestDto, member).toEntity());
+        challengeGroup.fromRequest(challengeGroupRequestDto, member).toEntity());
 
-    memberGroupRepository.save(MemberGroup.create(ChallengeGroup.fromEntity(challengeGroupEntity), member).toEntity());
+    memberGroupRepository.save(memberGroup.create(ChallengeGroup.fromEntity(challengeGroupEntity), member)
+        .toEntity());
+
     return ChallengeGroupResponseDto.fromEntity(challengeGroupEntity);
   }
 
@@ -171,9 +177,8 @@ public class ChallengeGroupService {
         .map(MemberGroup::fromEntity)
         .orElseThrow(() -> new IllegalArgumentException("그룹에 속해 있지 않습니다."));
 
-    memberGroupRepository.save(memberGroup.updateSavedAmount(savingMoneyRequestDto).toEntity());
-
-    return MemberGroupResponseDto.fromEntity(memberGroup.toEntity());
+    return MemberGroupResponseDto.fromEntity(
+        memberGroupRepository.save(memberGroup.updateSavedAmount(savingMoneyRequestDto).toEntity()));
   }
 
   public List<Message> getMessages(Long groupId, Member member) {
