@@ -5,6 +5,8 @@ import com.cozybinarybase.accountstopthestore.model.message.domain.Message;
 import com.cozybinarybase.accountstopthestore.model.message.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +20,9 @@ public class MessageController {
 
   @MessageMapping("/send")
   public void chat(Message message,
-      @AuthenticationPrincipal(expression="member") Member member) {
+      SimpMessageHeaderAccessor headerAccessor) {
+    Authentication authentication = (Authentication) headerAccessor.getSessionAttributes().get("member");
+    Member member = (Member) authentication.getPrincipal();
     messageService.saveAndSend(message, member);
   }
 }
