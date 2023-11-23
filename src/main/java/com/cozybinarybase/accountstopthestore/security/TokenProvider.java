@@ -8,13 +8,16 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +29,7 @@ public class TokenProvider {
   public static final String ACCESS_TOKEN_HEADER = "Authorization";
   public static final String TOKEN_PREFIX = "Bearer ";
   private static final String REFRESH_TOKEN_HEADER = "Authorization-refresh";
+  
   private final MemberRepository memberRepository;
 
   @Value("${jwt.secretKey}")
@@ -93,22 +97,41 @@ public class TokenProvider {
   }
 
   public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
-    response.setStatus(HttpServletResponse.SC_OK);
+    ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+        .httpOnly(true)
+        .path("/")
+        .sameSite("None")
+        .secure(true)
+        .build();
 
-    response.setHeader(ACCESS_TOKEN_HEADER, TOKEN_PREFIX + accessToken);
-    response.setHeader(REFRESH_TOKEN_HEADER, TOKEN_PREFIX + refreshToken);
-    log.info("Access Token, Refresh Token 헤더 설정 완료");
+    ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+        .httpOnly(true)
+        .path("/")
+        .sameSite("None")
+        .secure(true)
+        .build();
+
+    response.addHeader("Set-Cookie", accessTokenCookie.toString());
+    response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+
+    log.info("Access Token, Refresh Token 쿠키 설정 완료");
+  }
+
+  public Optional<String> extractToken(HttpServletRequest request, String cookieName) {
+    if (request.getCookies() == null) {
+      return Optional.empty();
+    }
+    return Arrays.stream(request.getCookies())
+        .filter(cookie -> cookie.getName().equals(cookieName))
+        .findFirst()
+        .map(Cookie::getValue);
   }
 
   public Optional<String> extractRefreshToken(HttpServletRequest request) {
-    return Optional.ofNullable(request.getHeader(REFRESH_TOKEN_HEADER))
-        .filter(refreshToken -> refreshToken.startsWith(TOKEN_PREFIX))
-        .map(refreshToken -> refreshToken.replace(TOKEN_PREFIX, ""));
+    return extractToken(request, "refreshToken");
   }
 
   public Optional<String> extractAccessToken(HttpServletRequest request) {
-    return Optional.ofNullable(request.getHeader(ACCESS_TOKEN_HEADER))
-        .filter(refreshToken -> refreshToken.startsWith(TOKEN_PREFIX))
-        .map(refreshToken -> refreshToken.replace(TOKEN_PREFIX, ""));
+    return extractToken(request, "accessToken");
   }
 }

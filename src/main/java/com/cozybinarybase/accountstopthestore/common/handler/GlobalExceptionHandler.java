@@ -1,8 +1,11 @@
 package com.cozybinarybase.accountstopthestore.common.handler;
 
 import com.cozybinarybase.accountstopthestore.common.handler.exception.MemberNotValidException;
-import com.cozybinarybase.accountstopthestore.model.asset.handler.exception.AssetNotValidException;
+import com.cozybinarybase.accountstopthestore.model.accountbook.exception.AccountBookNotValidException;
+import com.cozybinarybase.accountstopthestore.model.asset.exception.AssetNotValidException;
 import com.cozybinarybase.accountstopthestore.model.category.exception.CategoryNotValidException;
+import com.cozybinarybase.accountstopthestore.model.images.exception.FileIsNotValidImageException;
+import com.cozybinarybase.accountstopthestore.model.images.exception.ImageNotValidException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,9 +57,47 @@ public class GlobalExceptionHandler {
         .body(errorDetails);
   }
 
+  @ExceptionHandler(AccountBookNotValidException.class)
+  public ResponseEntity<?> handleAccountBookNotValidException(AccountBookNotValidException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
+
+  @ExceptionHandler(ImageNotValidException.class)
+  public ResponseEntity<?> handleImageNotValidException(ImageNotValidException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
+
+  @ExceptionHandler(FileIsNotValidImageException.class)
+  public ResponseEntity<?> handleFileIsNotValidImageException(FileIsNotValidImageException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-    Map<String, String> errors = ex.getBindingResult().getFieldErrors()
+  public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errors = e.getBindingResult().getFieldErrors()
         .stream()
         .collect(Collectors.toMap(
             FieldError::getField,
@@ -66,5 +107,29 @@ public class GlobalExceptionHandler {
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(errors);
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", e.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(errorDetails);
+  }
+
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<?> handleRuntimeException(RuntimeException e) {
+    log.error(e.getMessage());
+
+    Map<String, String> errorDetails = new HashMap<>();
+    errorDetails.put("message", (e.getMessage() != null) ? e.getMessage() : "내부 서버 에러");
+
+    return ResponseEntity
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(errorDetails);
   }
 }
