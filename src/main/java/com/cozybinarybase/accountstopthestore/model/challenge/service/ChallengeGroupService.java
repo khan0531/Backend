@@ -131,12 +131,17 @@ public class ChallengeGroupService {
 
   public List<ChallengeGroupResponseDto> getChallengeGroups(Member member) {
     memberService.validateAndGetMember(member);
-    List<ChallengeGroupEntity> challengeGroupEntitiess = memberGroupRepository.findByMember(member.toEntity())
+    List<ChallengeGroupEntity> challengeGroupEntities = memberGroupRepository.findByMember(member.toEntity())
         .stream()
         .map(MemberGroupEntity::getChallengeGroup)
         .toList();
 
-    return ChallengeGroupResponseDto.fromEntities(challengeGroupEntitiess);
+    List<ChallengeGroupResponseDto> challengeGroups = ChallengeGroupResponseDto.setViewer(
+        ChallengeGroupResponseDto.fromEntities(challengeGroupEntities),
+        member
+    );
+
+    return challengeGroups;
   }
 
   public ChallengeGroupResponseDto updateChallengeGroup(Long groupId, ChallengeGroupRequestDto challengeGroupRequestDto,
