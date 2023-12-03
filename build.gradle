@@ -1,0 +1,89 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.17'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = "16"
+}
+
+configurations {
+	all {
+		exclude group: "org.slf4j", module: "slf4j-simple"
+	}
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.3'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.json:json:20231013'
+	implementation 'commons-io:commons-io:2.15.0'
+
+	// querydsl
+	implementation 'com.querydsl:querydsl-jpa'
+	implementation 'com.querydsl:querydsl-apt'
+
+	// swagger
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'com.h2database:h2'
+
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+
+	// aws ses
+	implementation platform('software.amazon.awssdk:bom:2.15.0')
+	implementation 'software.amazon.awssdk:ses'
+
+	// redis
+	implementation 'it.ozimov:embedded-redis:0.7.3'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'io.lettuce:lettuce-core:6.2.6.RELEASE'
+}
+
+// QueryDSL 플러그인 설정
+querydsl {
+	library = "com.querydsl:querydsl-apt"
+	jpa = true
+	querydslSourcesDir = "src/main/generated"
+}
+
+sourceSets {
+	main.java.srcDir "src/main/generated"
+}
+
+configurations {
+	querydsl.extendsFrom compileClasspath
+}
+
+compileQuerydsl {
+	options.annotationProcessorPath = configurations.querydsl
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+targetCompatibility = JavaVersion.VERSION_16
