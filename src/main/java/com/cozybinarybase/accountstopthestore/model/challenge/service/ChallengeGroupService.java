@@ -136,7 +136,12 @@ public class ChallengeGroupService {
         .map(MemberGroupEntity::getChallengeGroup)
         .toList();
 
-    return ChallengeGroupResponseDto.fromEntities(challengeGroupEntities);
+    List<ChallengeGroupResponseDto> challengeGroupss = ChallengeGroupResponseDto.setViewer(
+        ChallengeGroupResponseDto.fromEntities(challengeGroupEntities),
+        member
+    );
+
+    return challengeGroupss;
   }
 
   public ChallengeGroupResponseDto updateChallengeGroup(Long groupId, ChallengeGroupRequestDto challengeGroupRequestDto,
