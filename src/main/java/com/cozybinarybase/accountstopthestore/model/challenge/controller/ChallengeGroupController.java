@@ -36,6 +36,16 @@ public class ChallengeGroupController {
     return ResponseEntity.ok(challengeGroupService.getChallengeGroups(member));
   }
 
+  @GetMapping("/{groupId}/invite-link")
+  public ResponseEntity<?> createInviteLink(@PathVariable Long groupId, @AuthenticationPrincipal Member member) {
+    return ResponseEntity.ok(challengeGroupService.createInviteLink(groupId, member));
+  }
+
+  @PostMapping("/join/{inviteLink}")
+  public ResponseEntity<?> joinGroup(@PathVariable String inviteLink, @AuthenticationPrincipal Member member) {
+    return ResponseEntity.ok(challengeGroupService.joinChallengeGroup(inviteLink, member));
+  }
+
   @PutMapping("/{groupId}")
   public ResponseEntity<?> updateGroup(@PathVariable Long groupId,
       @RequestBody ChallengeGroupRequestDto challengeGroupRequestDto, @AuthenticationPrincipal Member member) {
@@ -51,16 +61,6 @@ public class ChallengeGroupController {
   public ResponseEntity<?> saveMoney(@PathVariable Long groupId,
       @RequestBody SavingMoneyRequestDto savingMoneyRequestDto, @AuthenticationPrincipal Member member) {
     return ResponseEntity.ok(challengeGroupService.saveMoney(groupId, savingMoneyRequestDto, member));
-  }
-
-  @GetMapping("/{groupId}/invite-link")
-  public ResponseEntity<?> createInviteLink(@PathVariable Long groupId, @AuthenticationPrincipal Member member) {
-    return ResponseEntity.ok(challengeGroupService.createInviteLink(groupId, member));
-  }
-
-  @PostMapping("/join/{inviteLink}")
-  public ResponseEntity<?> joinGroup(@PathVariable String inviteLink, @AuthenticationPrincipal Member member) {
-    return ResponseEntity.ok(challengeGroupService.joinChallengeGroup(inviteLink, member));
   }
 
   // 서버 추방 & 나가기
